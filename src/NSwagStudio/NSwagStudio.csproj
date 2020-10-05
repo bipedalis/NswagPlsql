@@ -172,6 +172,7 @@
     <Compile Include="Converters\StringArrayConverter.cs" />
     <Compile Include="ISwaggerGeneratorView.cs" />
     <Compile Include="ViewModels\CodeGeneratorModel.cs" />
+    <Compile Include="ViewModels\CodeGenerators\SwaggerToPlSqlClientGeneratorViewModel.cs" />
     <Compile Include="ViewModels\CodeGenerators\SwaggerToCSharpControllerGeneratorViewModel.cs" />
     <Compile Include="ViewModels\CodeGenerators\SwaggerOutputViewModel.cs" />
     <Compile Include="ViewModels\CodeGenerators\SwaggerToCSharpClientGeneratorViewModel.cs" />
@@ -193,6 +194,12 @@
     </Compile>
     <Compile Include="Views\CodeGenerators\SwaggerOutputView.xaml.cs">
       <DependentUpon>SwaggerOutputView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\CodeGenerators\SwaggerToPlSqlClientGeneratorView.xaml.cs">
+      <DependentUpon>SwaggerToPlSqlClientGeneratorView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\CodeGenerators\Views\PlSqlSettingsView .xaml.cs">
+      <DependentUpon>PlSqlSettingsView .xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\CodeGenerators\Views\CSharpSettingsView.xaml.cs">
       <DependentUpon>CSharpSettingsView.xaml</DependentUpon>
@@ -237,6 +244,14 @@
     <Page Include="Views\CodeGenerators\SwaggerOutputView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\CodeGenerators\SwaggerToPlSqlClientGeneratorView.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Views\CodeGenerators\Views\PlSqlSettingsView .xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
     </Page>
     <Page Include="Views\CodeGenerators\Views\CSharpSettingsView.xaml">
       <SubType>Designer</SubType>

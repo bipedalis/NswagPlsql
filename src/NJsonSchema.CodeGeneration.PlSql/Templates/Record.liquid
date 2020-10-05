@@ -1,0 +1,15 @@
+﻿{% if HasDescription -%}
+--- <summary>{{ Description | csharpdocs }}</summary>
+{% endif -%}
+
+--- NJsonSchema.CodeGeneration.PlSql {{ ToolchainVersion }}
+
+ type {{ClassName}} is record
+({% assign sep = "" %}
+{% for property in Properties -%}
+{{ sep }}{% assign sep = "," %}
+    {{ property.FieldName }} {{ property.Type }} {% if property.HasDefaultValue %} default {{ property.DefaultValue }} {% endif -%}
+{% endfor -%}
+ 
+);
+type {{ClassName}}T is table of {{ClassName}};

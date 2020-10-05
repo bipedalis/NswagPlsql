@@ -24,7 +24,7 @@ namespace NSwagStudio.Views
             InitializeComponent();
             ViewModelHelper.RegisterViewModel(Model, this);
             RegisterShortcuts();
-            CheckForApplicationUpdate();
+            //CheckForApplicationUpdate();
             LoadWindowState();
             RegisterFileOpenHandler();
 

@@ -16,6 +16,10 @@ namespace NSwag.Commands
         [JsonProperty("OpenApiToCSharpClient", NullValueHandling = NullValueHandling.Ignore)]
         public OpenApiToCSharpClientCommand OpenApiToCSharpClientCommand { get; set; }
 
+        /// <summary>Gets or sets the OpenApiToPlSqlClient.</summary>
+        [JsonProperty("OpenApiToPlSqlClient", NullValueHandling = NullValueHandling.Ignore)]
+        public OpenApiToPlSqlClientCommand OpenApiToPlSqlClientCommand { get; set; }
+
         /// <summary>Gets or sets the SwaggerToCSharpControllerCommand.</summary>
         [JsonProperty("OpenApiToCSharpController", NullValueHandling = NullValueHandling.Ignore)]
         public OpenApiToCSharpControllerCommand OpenApiToCSharpControllerCommand { get; set; }
@@ -26,7 +30,8 @@ namespace NSwag.Commands
         {
             OpenApiToTypeScriptClientCommand,
             OpenApiToCSharpClientCommand,
-            OpenApiToCSharpControllerCommand
+            OpenApiToCSharpControllerCommand,
+            OpenApiToPlSqlClientCommand
         }.Where(cmd => cmd != null);
     }
 }

@@ -1,0 +1,8 @@
+﻿function get_json(v_model {{ClassName}}) return json as
+     v_json json := json(); 
+   begin
+{% for property in Properties -%}
+     v_json.put('{{property.FieldName}}', v_model.{{property.FieldName}});
+{% endfor -%}
+     return v_json;
+   end;  

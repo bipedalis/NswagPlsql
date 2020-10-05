@@ -1,5 +1,4 @@
 {% if response.HasType -%}
-
 {%     if response.IsFile -%}
 {%         if response.IsSuccess -%}
 var responseStream_ = response_.Content == null ? System.IO.Stream.Null : await response_.Content.ReadAsStreamAsync().ConfigureAwait(false);
@@ -10,7 +9,6 @@ return fileResponse_;
 var objectResponse_ = await ReadObjectResponseAsync<{{ response.Type }}>(response_, headers_).ConfigureAwait(false);
 throw new {{ ExceptionClass }}<{{ response.Type }}>("{{ response.ExceptionDescription }}", status_, objectResponse_.Text, headers_, objectResponse_.Object, null);
 {%         endif -%}
-
 {%     elsif response.IsPlainText -%}
 var responseData_ = response_.Content == null ? null : await response_.Content.ReadAsStringAsync().ConfigureAwait(false);
 var result_ = ({{ response.Type }})System.Convert.ChangeType(responseData_, typeof({{ response.Type }}));
@@ -21,12 +19,11 @@ return new {{ ResponseClass }}<{{ operation.UnwrappedResultType }}>(status_, hea
 return result_;
 {%             endif -%}
 {%         endif -%}
-
 {%     else -%}
 {%         if response.IsNullable == false -%}
 if v_res is null then
-    Raise_application_error(-20000, 'Response was null which was not expected.');
-end if
+    raise_application_error(-20000,'Response was null which was not expected.');
+end if;
 {%         endif -%}
 {%         if response.IsSuccess -%}
 {%             if operation.WrapResponse -%}
@@ -36,10 +33,21 @@ return v_res;
 {%             endif -%}
 {%         endif -%}
 {%         if response.IsSuccess == false -%}
-    Raise_application_error(-20000, '{{ response.ExceptionDescription }}');
+{%             if response.InheritsExceptionSchema -%}
+var responseObject_ = objectResponse_.Object != null ? objectResponse_.Object : new {{ response.Type }}();
+responseObject_.Data.Add("HttpStatus", status_.ToString());
+responseObject_.Data.Add("HttpHeaders", headers_);
+responseObject_.Data.Add("HttpResponse", objectResponse_.Text);
+{%                 if WrapDtoExceptions -%}
+throw new {{ ExceptionClass }}("{{ response.ExceptionDescription }}", status_, objectResponse_.Text, headers_, responseObject_);
+{%                 else -%}
+throw responseObject_;
+{%                 endif -%}
+{%             else -%}
+throw new {{ ExceptionClass }}<{{ response.Type }}>("{{ response.ExceptionDescription }}", status_, objectResponse_.Text, headers_, objectResponse_.Object, null);
+{%             endif -%}
 {%         endif -%}
 {%     endif -%}
-
 {% elseif response.IsSuccess -%}
 {%     if operation.HasResultType -%}
 {%         if operation.WrapResponse -%}

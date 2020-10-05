@@ -1,0 +1,8 @@
+
+    {% template Client.Interface.Body %}
+{% for operation in InterfaceOperations -%}
+    {% template Client.Method.Documentation %}
+    {% template Client.Method.Annotations %}
+    function {{ operation.ActualOperationName }}({% for parameter in operation.Parameters %}{{ parameter.VariableName }} {{ parameter.Type }}{% if parameter.IsLast == false %}, {% endif %}{% endfor %}) return {{ operation.ResultType }};
+
+{% endfor -%}

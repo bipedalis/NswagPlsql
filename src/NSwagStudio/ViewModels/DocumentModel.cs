@@ -37,6 +37,7 @@ namespace NSwagStudio.ViewModels
             {
                 new SwaggerOutputView(),
                 new SwaggerToTypeScriptClientGeneratorView(Document),
+                new SwaggerToPlSqlClientGeneratorView(Document),
                 new SwaggerToCSharpClientGeneratorView(Document),
                 new SwaggerToCSharpControllerGeneratorView(Document)
             }
