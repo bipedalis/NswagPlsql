@@ -23,16 +23,48 @@ namespace NJsonSchema.CodeGeneration.PlSql
         protected override string Generate(JsonSchema schema, string typeNameHint)
         {
             string name = base.Generate(schema, typeNameHint);
-            if (name.Length>=30)
+            name = name.Replace('`', '_').Replace('+','_');
+            if (name.Length>=29)
             {
-                name = name.Substring(0,21) + name.GetHashCode().ToString("X");
+                name = name.Substring(0,20) + name.GetHashCode().ToString("X");
             }
             else if (ReservedKeywords.Contains(name.ToLower()))
             {
                 name = name  +name.GetHashCode().ToString("X");
             }
-
+            System.Diagnostics.Debug.Assert(name.Length < 30);
             return name;
+        }
+        /// <summary>Generates the type name for the given schema respecting the reserved type names.</summary>
+        /// <param name="schema">The schema.</param>
+        /// <param name="typeNameHint">The type name hint.</param>
+        /// <param name="reservedTypeNames">The reserved type names.</param>
+        /// <returns>The type name.</returns>
+        public override string Generate(JsonSchema schema, string typeNameHint, IEnumerable<string> reservedTypeNames)
+        {
+            if (string.IsNullOrEmpty(typeNameHint) && !string.IsNullOrEmpty(schema.DocumentPath))
+            {
+                typeNameHint = schema.DocumentPath.Replace("\\", "/").Split('/').Last();
+            }
+
+            typeNameHint = (typeNameHint ?? "")
+                .Replace("[", " Of ")
+                .Replace("]", " ")
+                .Replace("<", " Of ")
+                .Replace(">", " ")
+                .Replace(",", " And ")
+                .Replace("  ", " ");
+
+            var parts = typeNameHint.Split(' ');
+            typeNameHint = string.Join(string.Empty, parts.Select(p => Generate(schema, p)));
+
+            var typeName = Generate(schema, typeNameHint);
+            if (string.IsNullOrEmpty(typeName) || reservedTypeNames.Contains(typeName))
+            {
+                //typeName = null; 
+            }
+
+            return typeName;
         }
     }
 }

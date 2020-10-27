@@ -17,7 +17,7 @@ namespace NJsonSchema.CodeGeneration.PlSql
         public PlSqlGeneratorSettings()
         {
             AnyType = "clob";
-            Namespace = "MyNamespace";
+            Namespace = "rest_api_client_pck";
             DateType = "Date";
             DateTimeType = "Timestamp";
             TimeType = "Timestamp";
@@ -32,8 +32,13 @@ namespace NJsonSchema.CodeGeneration.PlSql
 });
             TypeNameGenerator = new OracleTypeNameGenerator();
         }
-        /// <summary>Gets or sets the .NET namespace of the generated types (default: MyNamespace).</summary>
+        /// <summary>Gets or sets the package name.</summary>
         public string Namespace { get; set; }
+
+        /// <summary>
+        /// Gets or sets the api base url
+        /// </summary>
+        public string BaseUrl { get; set; }
 
 
         /// <summary>Gets or sets the any type (default: "object").</summary>

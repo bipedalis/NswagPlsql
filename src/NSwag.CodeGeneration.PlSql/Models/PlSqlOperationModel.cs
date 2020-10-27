@@ -82,9 +82,25 @@ namespace NSwag.CodeGeneration.PlSql.Models
         }
 
         /// <summary>Gets the actual name of the operation (language specific).</summary>
-        public override string ActualOperationName => ConversionUtilities.ConvertToUpperCamelCase(OperationName, false)
-            + (MethodAccessModifier == "protected" ? "Core" : string.Empty);
-
+        public override string ActualOperationName
+        {
+            get
+            {
+                var name = ConversionUtilities.ConvertToUpperCamelCase(OperationName, true);
+                if (name.Length >= 30)
+                {
+                    int postfixLength = 0;
+                    string postfix;
+                    if (name.EndsWith("Get") || name.EndsWith("Put"))
+                        postfixLength = 3;
+                    else if(name.EndsWith("Post"))
+                        postfixLength = 4;
+                    postfix = name.Substring(name.Length - postfixLength, postfixLength);
+                    name = name.Substring(0,  29 -postfixLength) + postfix;                    
+                }
+                return name;
+            }
+        }
         /// <summary>Gets a value indicating whether this operation is rendered as interface method.</summary>
         public bool IsInterfaceMethod => MethodAccessModifier == "public";
 
@@ -120,7 +136,30 @@ namespace NSwag.CodeGeneration.PlSql.Models
                 return SyncResultType;
             }
         }
-
+        /// <summary>
+        /// Too deep for Oracle
+        /// </summary>
+        public bool IsVeryComplex
+        {
+            get
+            {
+                return ResultType == "PagedResult_1OfCBCD44323C306" || ResultType== "PagedResult_1OfCBCD4540151E";
+            }
+        }
+        /// <summary>Gets the type of the unwrapped result type (without Task).</summary>
+        public string ItemsResultType
+        {
+            get
+            {
+                var response = GetSuccessResponse();
+                JsonSchemaProperty items;
+                if (response.Value.Schema.ActualTypeSchema.ActualProperties.TryGetValue("Items", out items))
+                {
+                    return   _generator.GetTypeName(items.ActualSchema, false, !response.Value.Schema.HasTypeNameTitle ? "Response" : null);
+                }
+                return null;
+            }
+        }
         /// <summary>Gets or sets the type of the exception.</summary>
         public override string ExceptionType
         {
@@ -204,7 +243,7 @@ namespace NSwag.CodeGeneration.PlSql.Models
             var name = base.GetParameterVariableName(parameter, allParameters);
             if (ReservedKeywords.Contains(name))
             {
-                name = "\"" + name + "\"";
+                name = "pi_" + name; // "\"" + name + "\"";
             }
             return name;
         }

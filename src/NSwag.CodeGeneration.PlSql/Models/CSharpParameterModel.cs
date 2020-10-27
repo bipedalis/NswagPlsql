@@ -35,8 +35,9 @@ namespace NSwag.CodeGeneration.PlSql.Models
             CodeGeneratorSettingsBase settings,
             IClientGenerator generator,
             TypeResolverBase typeResolver)
-            : base(parameterName, variableName, typeName, parameter, allParameters, settings, generator, typeResolver)
+            : base(parameterName, variableName, typeName.IndexOf("(") > 0 ? typeName.Substring(0, typeName.IndexOf("(")) : typeName, parameter, allParameters, settings, generator, typeResolver)
         {
+            
         }
 
         /// <summary>Gets a value indicating whether the type is a Nullable&lt;&gt;.</summary>
@@ -47,5 +48,7 @@ namespace NSwag.CodeGeneration.PlSql.Models
 
         /// <summary>Gets a value indicating whether the parameter name is a valid PlSql identifier.</summary>
         public bool IsValidIdentifier => Name.Equals(VariableName, StringComparison.OrdinalIgnoreCase);
+        public bool IsVarchar => Type == "VARCHAR2";
+
     }
 }

@@ -6,6 +6,7 @@
 
  type {{ClassName}} is record
 ({% assign sep = "" %}
+    m_isNull boolean,
 {% for property in Properties -%}
 {{ sep }}{% assign sep = "," %}
     {{ property.FieldName }} {{ property.Type }} {% if property.HasDefaultValue %} default {{ property.DefaultValue }} {% endif -%}

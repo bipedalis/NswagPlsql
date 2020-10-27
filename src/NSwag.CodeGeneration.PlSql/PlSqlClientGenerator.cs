@@ -8,6 +8,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using NJsonSchema.CodeGeneration;
 using NJsonSchema.CodeGeneration.PlSql;
 using NSwag.CodeGeneration.PlSql.Models;
@@ -18,7 +19,7 @@ namespace NSwag.CodeGeneration.PlSql
     public class PlSqlClientGenerator : PlSqlGeneratorBase
     {
         private readonly  OpenApiDocument _document;
-
+        private List<string> _ops = new List<string>();
         /// <summary>Initializes a new instance of the <see cref="PlSqlClientGenerator" /> class.</summary>
         /// <param name="document">The Swagger document.</param>
         /// <param name="settings">The settings.</param>
@@ -58,6 +59,16 @@ namespace NSwag.CodeGeneration.PlSql
             var model = new PlSqlClientTemplateModel(controllerName, controllerClassName, operations, exceptionSchema, _document, Settings);
             if (model.HasOperations)
             {
+                var ops = model.Operations.Select(o => new Tuple<PlSqlOperationModel, string>(o, o.ActualOperationName + o.Parameters.Select(p => p.Type).Aggregate((p1, p2) => p1 + p2)));
+                foreach(var op in ops)
+                {
+                    if(_ops.Contains(op.Item2))
+                    {
+                        op.Item1.OperationName = op.Item1.OperationName + "2";
+                    }
+                    _ops.Add(op.Item2);
+                }
+                
                 if (model.GenerateClientInterfaces)
                 {
                     var interfaceTemplate = Settings.PlSqlGeneratorSettings.TemplateFactory.CreateTemplate("PlSql", "Client.Interface", model);

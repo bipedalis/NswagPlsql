@@ -129,7 +129,10 @@ namespace NJsonSchema.CodeGeneration.PlSql
         protected override CodeArtifact GenerateType(JsonSchema schema, string typeNameHint)
         {
             var typeName = _resolver.GetOrGenerateTypeName(schema, typeNameHint);
-
+            if(typeName.Length >= 30)
+            {
+                typeName = typeName.Substring(0, 29);
+            }
             if (schema.IsEnumeration)
             {
                 return GenerateEnum(schema, typeName);

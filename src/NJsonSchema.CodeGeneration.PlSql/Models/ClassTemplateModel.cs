@@ -101,6 +101,10 @@ namespace NJsonSchema.CodeGeneration.PlSql.Models
         /// <summary>Gets a value indicating whether this class represents a tuple.</summary>
         public bool IsTuple => _schema.ActualTypeSchema.IsTuple;
 
+        /// <summary>Gets a value indicating whether this class represents a tuple.</summary>
+        public bool IsNotEnumeration => !_schema.ActualTypeSchema.IsEnumeration;
+
+
         /// <summary>Gets the tuple types.</summary>
         public string[] TupleTypes => _schema.ActualTypeSchema.Items
             .Select(i => _resolver.Resolve(i, i.IsNullable(_settings.SchemaType), string.Empty, false))

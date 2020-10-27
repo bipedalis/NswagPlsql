@@ -1,21 +1,15 @@
 ﻿{% if HasDescription -%}
-/// <summary>{{ Description | csharpdocs }}</summary>
+--- <summary>{{ Description | csharpdocs }}</summary>
 {% endif -%}
-[System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "{{ ToolchainVersion }}")]
-{% if IsEnumAsBitFlags -%}
-[System.Flags]
-{% endif -%}
-{{ TypeAccessModifier }} enum {{ Name }}
-{
 {% for enum in Enums -%}
 {%   if IsStringEnum -%}
-    [System.Runtime.Serialization.EnumMember(Value = @"{{ enum.Value | replace: '"', '""' }}")]
+--    [System.Runtime.Serialization.EnumMember(Value = @"{{ enum.Value | replace: '"', '""' }}")]
 {%   endif -%}
 {% if IsEnumAsBitFlags -%}
-    {{ enum.Name }} = {{ enum.InternalFlagValue }},
+--    {{ enum.Name }} = {{ enum.InternalFlagValue }},
 {% else -%}
-    {{ enum.Name }} = {{ enum.InternalValue }},
+--    {{ enum.Name }} = {{ enum.InternalValue }},
 {% endif -%}
 
 {% endfor -%}
-}
+-- type {{Name}} is pls_integer;

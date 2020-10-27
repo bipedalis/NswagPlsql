@@ -134,7 +134,7 @@ namespace NJsonSchema.CodeGeneration.PlSql
 
             if (schema.ActualTypeSchema.IsEnumeration)
             {
-                return GetOrGenerateTypeName(schema, typeNameHint) + (isNullable ? "?" : string.Empty);
+                return "number"; // GetOrGenerateTypeName(schema, typeNameHint) + (isNullable ? "?" : string.Empty);
             }
 
             return GetOrGenerateTypeName(schema, typeNameHint) + nullableReferenceType;
@@ -259,7 +259,14 @@ namespace NJsonSchema.CodeGeneration.PlSql
             {
                 var itemTypeNameHint = (schema as JsonSchemaProperty)?.Name;
                 var itemType = Resolve(schema.Item, true, itemTypeNameHint);
-                return string.Format("{0}T", itemType);
+                if (schema.Item.ActualTypeSchema.IsObject)
+                {
+                    return string.Format("{0}T", itemType);
+                }
+                else
+                {
+                    return string.Format("{0}T", itemType.Replace('(','_').Replace(')','_'));
+                }
             }
 
             if (schema.Items != null && schema.Items.Count > 0)
@@ -278,8 +285,8 @@ namespace NJsonSchema.CodeGeneration.PlSql
         {
             //throw new  NotImplementedException();
             var valueType = ResolveDictionaryValueType(schema, "object");
-            var keyType = ResolveDictionaryKeyType(schema, "string");
-            return string.Format(Settings.DictionaryType + "<{0}, {1}>", keyType, valueType);
+            //var keyType = ResolveDictionaryKeyType(schema, "string");
+            return valueType; // string.Format(Settings.DictionaryType + "<{0}, {1}>", keyType, valueType);
         }
     }
 }

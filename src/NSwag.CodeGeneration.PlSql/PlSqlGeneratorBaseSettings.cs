@@ -22,8 +22,8 @@ namespace NSwag.CodeGeneration.PlSql
         {
             PlSqlGeneratorSettings = new PlSqlGeneratorSettings
             {
-                Namespace = "MyNamespace",
-                SchemaType = SchemaType.Swagger2
+                //Namespace = "rest_api_client_pck",
+                SchemaType = SchemaType.OpenApi3 //.Swagger2
             };
 
             PlSqlGeneratorSettings.TemplateFactory = new DefaultTemplateFactory(PlSqlGeneratorSettings, new[]

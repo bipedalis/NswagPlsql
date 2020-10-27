@@ -1,1 +1,4 @@
-﻿function get_json(v_model {{ClassName}}) return json;
+﻿{% if IsNotEnumeration -%}
+function get_json(v_model {{ClassName}}) return json;
+function get_json(v_list {{ClassName}}T) return json_list;
+{% endif -%}

@@ -7,6 +7,7 @@
 //-----------------------------------------------------------------------
 
 using System.Globalization;
+using System.Linq;
 using NJsonSchema.CodeGeneration.Models;
 
 namespace NJsonSchema.CodeGeneration.PlSql.Models
@@ -17,7 +18,7 @@ namespace NJsonSchema.CodeGeneration.PlSql.Models
         private readonly JsonSchemaProperty _property;
         private readonly PlSqlGeneratorSettings _settings;
         private readonly PlSqlTypeResolver _resolver;
-
+        private string _className;
         /// <summary>Initializes a new instance of the <see cref="PropertyModel"/> class.</summary>
         /// <param name="classTemplateModel">The class template model.</param>
         /// <param name="property">The property.</param>
@@ -33,22 +34,49 @@ namespace NJsonSchema.CodeGeneration.PlSql.Models
             _property = property;
             _settings = settings;
             _resolver = typeResolver;
+            _className = classTemplateModel.ClassName;
         }
 
         /// <summary>Gets the name of the property.</summary>
         public string Name => _property.Name;
 
+        /// <summary>Gets the name of the property.</summary>
+        public string JsonName => Name.First().ToString().ToLower() + Name.Substring(1);
+
         /// <summary>Gets the type of the property.</summary>
-        public override string Type => _resolver.Resolve(_property, _property.IsNullable(_settings.SchemaType), GetTypeNameHint());
+        public override string Type
+        {
+            get
+            {
+                var t = _resolver.Resolve(_property, _property.IsNullable(_settings.SchemaType), GetTypeNameHint());
+                if(t== _className)
+                {
+                    t = "clob"; // rekursiju neatbalsta
+                }
+                return t;
+            }
+        }
 
         /// <summary>Gets a value indicating whether the property has a description.</summary>
         public bool HasDescription => !string.IsNullOrEmpty(_property.Description);
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public bool IsComplex
+        {
+            get
+            {
+                return (_property.ActualTypeSchema.IsObject || _property.ActualTypeSchema.IsArray) &&
+                    Type != "clob";
+            }
+        }
 
         /// <summary>Gets the description.</summary>
         public string Description => _property.Description;
 
         /// <summary>Gets the name of the field.</summary>
-        public string FieldName =>  ConversionUtilities.ConvertToLowerCamelCase(PropertyName, true);
+        public string FieldName => "m_" + ConversionUtilities.ConvertToLowerCamelCase(PropertyName, true);
 
         /// <summary>Gets a value indicating whether the property is nullable.</summary>
         public override bool IsNullable => ( !_property.IsRequired) || base.IsNullable;

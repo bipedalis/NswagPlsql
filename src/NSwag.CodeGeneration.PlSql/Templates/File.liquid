@@ -7,6 +7,11 @@
 ----------------------
 
 {% if GenerateContracts -%}
+    type RAW_16_T is table of raw(16);
+    type VARCHAR2_1024_T is table of varchar2(1024);
+
+    c_baseUrl varchar2(128) := '{{ BaseUrl }}';
+
     {{ Classes | tab }}
 
 {%     if WrapResponses and GenerateResponseClasses -%}
@@ -47,10 +52,68 @@
 end {{ Namespace }};
 /
 create or replace package body {{ Namespace }} is 
-{% if UseBaseUrl and GenerateBaseUrlProperty -%}
-    c_baseUrl varchar2(128) := '{{ BaseUrl }}';
-{% endif -%}
 
+function ConvertToString(pi boolean) return varchar2 is
+  begin
+    if pi then
+        return 'true';
+    else
+        return 'false';
+    end if;
+end ConvertToString;
+
+function ConvertToString(pi number)  return varchar2 is
+  begin
+    return to_char(pi);
+end ConvertToString;
+
+function ConvertToString(pi raw)  return varchar2 is
+  begin
+    return REGEXP_REPLACE(pi, '(.{8})(.{4})(.{4})(.{4})(.*)', '\1-\2-\3-\4-\5');
+end ConvertToString;
+procedure rae(pi_status_code pls_integer) as 
+  begin
+   raise_application_error(-20000,'The HTTP status code of the response was not expected (' || pi_status_code || ').');
+end rae;
+function get_json(v_list RAW_16_T) return json_list as
+     v_json_list json_list := json_list();
+   begin
+     for i in v_list.first .. v_list.last loop
+       v_json_list.append( v_list(i));
+     end loop;
+     return v_json_list;
+   end;
+
+function get_json(v_list VARCHAR2_1024_T) return json_list as
+     v_json_list json_list := json_list();
+   begin
+     for i in v_list.first .. v_list.last loop
+       v_json_list.append( v_list(i));
+     end loop;
+     return v_json_list;
+   end;
+procedure from_json(pi_data json_value, po_data in out VARCHAR2_1024_T ) as 
+     v_json_list json_list;
+  begin     
+	 v_json_list := json_list(pi_data);
+     if v_json_list.count>0 then
+         po_data.extend(v_json_list.count);
+         for i in 1 .. v_json_list.count loop
+            po_data(i) := v_json_list.get(i).get_string();
+         end loop;  
+     end if;
+   end;  
+procedure from_json(pi_data json_value, po_data in out RAW_16_T ) as 
+     v_json_list json_list;
+  begin
+	 v_json_list := json_list(pi_data);
+     if v_json_list.count>0 then
+         po_data.extend(v_json_list.count);
+         for i in 1 .. v_json_list.count loop
+            po_data(i) := replace(v_json_list.get(i).get_string(),'-','');
+         end loop;  
+    end if;
+   end;  
 {{ Clients | tab }}
 end {{ Namespace }};
 /

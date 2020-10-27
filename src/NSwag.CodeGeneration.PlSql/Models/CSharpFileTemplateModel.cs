@@ -23,6 +23,7 @@ namespace NSwag.CodeGeneration.PlSql.Models
         private readonly PlSqlTypeResolver _resolver;
         private readonly ClientGeneratorOutputType _outputType;
         private readonly PlSqlGeneratorBase _generator;
+        private readonly string _baseUrl;
 
         /// <summary>Initializes a new instance of the <see cref="PlSqlFileTemplateModel" /> class.</summary>
         /// <param name="clientTypes">The client types.</param>
@@ -46,19 +47,26 @@ namespace NSwag.CodeGeneration.PlSql.Models
             _generator = generator;
             _settings = settings;
             _resolver = resolver;
-            _clientCode = clientTypes.Where(c => c.Category == CodeArtifactCategory.Client)
-                .Concat(
-                dtoTypes.Where(c => c.Type == CodeArtifactType.Function))
+            var toJsonFunctions = dtoTypes.Where(c => c.Type == CodeArtifactType.Function).ToList();
+            SortByDependencies(toJsonFunctions);
+            _clientCode = toJsonFunctions.Concat( clientTypes.Where(c => c.Category == CodeArtifactCategory.Client))
                 .Concatenate();
-            _interfaceCode = clientTypes.Where(c => c.Category == CodeArtifactCategory.Contract).Concat(
-                dtoTypes.Where(c => c.Type==CodeArtifactType.Interface))
+            _interfaceCode = clientTypes.Where(c => c.Category == CodeArtifactCategory.Contract)
+                //.Concat(dtoTypes.Where(c => c.Type == CodeArtifactType.Interface))
                 .Concatenate();
             var dto = dtoTypes.Where(c => c.Type != CodeArtifactType.Interface && c.Type != CodeArtifactType.Function).OrderByBaseDependency().ToList();
-            var i = dto.Count-1;
+            SortByDependencies(dto);
+            Classes = dto.Concatenate();
+            _baseUrl = _document.BaseUrl;
+        }
+
+        private static void SortByDependencies(List<CodeArtifact> dto)
+        {
+            var i = dto.Count - 1;
             do
             {
-                var j = dto.FindIndex(a => a.Code.Contains(" " + dto[i ].TypeName + " ") || a.Code.Contains(" " + dto[i].TypeName + "T "));
-                if(j>=0 && j<i)
+                var j = dto.FindIndex(a => a.Code.Contains(" " + dto[i].TypeName + " ") || a.Code.Contains(" " + dto[i].TypeName + "T "));
+                if (j >= 0 && j < i)
                 {
                     var t = dto[j];
                     dto[j] = dto[i];
@@ -69,7 +77,6 @@ namespace NSwag.CodeGeneration.PlSql.Models
                     i--;
                 }
             } while (i > 0);
-            Classes = dto.Concatenate();
         }
 
         /// <summary>Gets the namespace.</summary>
@@ -106,6 +113,9 @@ namespace NSwag.CodeGeneration.PlSql.Models
 
         /// <summary>Gets the classes code.</summary>
         public string Classes { get; }
+
+        /// <summary>Gets the service base URL.</summary>
+        public string BaseUrl => _baseUrl;
 
         /// <summary>Gets a value indicating whether the generated code requires a JSON exception converter.</summary>
         public bool RequiresJsonExceptionConverter => JsonExceptionTypes.Any();

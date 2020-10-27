@@ -1,5 +1,5 @@
 ﻿{% if UseBaseUrl and GenerateBaseUrlProperty -%}
-    c_baseUrl varchar2(128) := '{{ BaseUrl }}';
+   -- c_baseUrl varchar2(128) := '{{ BaseUrl }}';
 {% endif -%}
 ----------- {{ Class }} ---------------
 {% for operation in Operations -%}
@@ -9,6 +9,8 @@
       v_url varchar2(512);
       v_res nclob;
       v_status_code pls_integer;
+      content_ nclob;
+      v_json json;
     begin
 {%     for parameter in operation.PathParameters -%}
 {%         if parameter.IsNullable == false and parameter.IsRequired and !parameter.IsObject -%}
@@ -47,13 +49,13 @@
 {%         if parameter.IsOptional -%}
         if {{ parameter.VariableName }} is not null then         
             {% template Client.Class.QueryParameter %}
-        end if
+        end if;
 {%         else -%}
         {% template Client.Class.QueryParameter %}
 {%         endif -%}
 {%     endfor -%}
 {%     if operation.HasQueryParameters -%}
-        v_url := rtrim(v_url,'?&');
+        v_url := rtrim(v_url,'?' || chr(38));
 {%     endif -%}
 
 {%     for parameter in operation.HeaderParameters -%}
@@ -80,7 +82,9 @@
                 var content_ = new System.Net.Http.StringContent({{ operation.ContentParameter.VariableName }});
                 content_.Headers.ContentType = System.Net.Http.Headers.MediaTypeHeaderValue.Parse("{{ operation.Consumes }}");
 {%         else -%}
-                content_ := get_json({{ operation.ContentParameter.VariableName }});
+                v_json := get_json({{ operation.ContentParameter.VariableName }});
+	             dbms_lob.createtemporary(content_, TRUE);
+	             v_json.to_clob(content_, TRUE);
                 --content_.Headers.ContentType = System.Net.Http.Headers.MediaTypeHeaderValue.Parse("{{ operation.Consumes }}");
 {%         endif -%}
 {%     else -%}
@@ -142,25 +146,16 @@
 {%     if operation.HasResultType and operation.HasAcceptHeaderParameterParameter == false -%}
               --  request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("{{ operation.Produces }}"));
 {%     endif -%}
-
-                --PrepareRequest(client_, request_, urlBuilder_);
-                --var url_ = urlBuilder_.ToString();
-                --request_.RequestUri = new System.Uri(url_, System.UriKind.RelativeOrAbsolute);
-                --PrepareRequest(client_, request_, url_);
-
                 {% template Client.Class.BeforeSend %}
-
                 u_web_pck.https_request('{{ operation.HttpMethodUpper | upcase }}',
-                url_,
+                v_url,
                 content_,
                 v_res,
                 v_status_code
                 );
-{%     for response in operation.Responses -%}
-                    if v_status_code = {{ response.StatusCode }}{% if response.CheckChunkedStatusCode %} or v_status_code = 206{% endif %} then
+                {%     for response in operation.Responses -%}if v_status_code = {{ response.StatusCode }}{% if response.CheckChunkedStatusCode %} or v_status_code = 206{% endif %} then
                         {% template Client.Class.ProcessResponse %}
-                    else
-{%     endfor -%}
+                    els{%     endfor -%}
 {%     if operation.HasDefaultResponse -%}
 {%         if operation.DefaultResponse.HasType -%}
                     
@@ -203,10 +198,30 @@
 {%             endif -%}
                     }
                     else
-{%         endif -%}
-                        raise_application_error(-20000,'The HTTP status code of the response was not expected (' + v_status_code + ').');
+{%         endif -%}e
+                        rae(v_status_code);
                     end if;
 {%     endif -%}
     end {{ operation.ActualOperationName }};
+    {% if operation.HasResult %}
+    procedure {{ operation.ActualOperationName }}P({% for parameter in operation.Parameters %}{{ parameter.VariableName }} {{ parameter.Type }}{% if parameter.IsLast == false %}, {% endif %}{% endfor %}, po_result out {{ operation.ResultType }}) as
+    begin
+        from_json(json(
+        {{ operation.ActualOperationName }}({% for parameter in operation.Parameters %}{{ parameter.VariableName }} {% if parameter.IsLast == false %}, {% endif %}{% endfor %})).to_json_value(),
+        po_result);
+    end {{ operation.ActualOperationName }}P;
+    {% if operation.IsVeryComplex %}
+    procedure {{ operation.ActualOperationName }}P({% for parameter in operation.Parameters %}{{ parameter.VariableName }} {{ parameter.Type }}{% if parameter.IsLast == false %}, {% endif %}{% endfor %}, po_result out {{ operation.ItemsResultType }}, po_totalPages out number) as
+        v_paged {{ operation.ResultType }};
+    begin
+        from_json(json(
+        {{ operation.ActualOperationName }}({% for parameter in operation.Parameters %}{{ parameter.VariableName }} {% if parameter.IsLast == false %}, {% endif %}{% endfor %})).to_json_value(),
+        v_paged);
+        po_result := v_paged.m_items;
+        po_totalPages := v_paged.m_totalPages;
+    end {{ operation.ActualOperationName }}P;    
+    {% endif -%}
+
+    {% endif %}
 {% endfor -%}
 ------------------- end  {{ Class }}

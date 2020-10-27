@@ -117,6 +117,11 @@ namespace NSwag.CodeGeneration.Models
                 }
 
                 var isNullable = response.Value.IsNullable(_settings.CodeGeneratorSettings.SchemaType);
+                JsonSchemaProperty items;
+                if (response.Value.Schema.ActualTypeSchema.ActualProperties.TryGetValue("Items", out items))
+                {
+                    var itemType = _generator.GetTypeName(items.ActualSchema, isNullable, !response.Value.Schema.HasTypeNameTitle ? "Response" : null);
+                }
                 return _generator.GetTypeName(response.Value.Schema, isNullable, !response.Value.Schema.HasTypeNameTitle ? "Response" : null);
             }
         }

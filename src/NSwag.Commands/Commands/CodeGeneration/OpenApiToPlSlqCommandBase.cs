@@ -132,12 +132,21 @@ namespace NSwag.Commands.CodeGeneration
 
         // PlSqlGeneratorSettings
 
-        [Argument(Name = "Namespace", Description = "The namespace of the generated classes.")]
+        [Argument(Name = "Namespace", Description = "The package name.")]
         public string Namespace
         {
             get { return Settings.PlSqlGeneratorSettings.Namespace; }
             set { Settings.PlSqlGeneratorSettings.Namespace = value; }
         }
+        
+
+        [Argument(Name = "BaseUrl", Description = "The base url.")]
+        public string BaseUrl
+        {
+            get { return Settings.PlSqlGeneratorSettings.BaseUrl; }
+            set { Settings.PlSqlGeneratorSettings.BaseUrl = value; }
+        }
+        
 
         [Argument(Name = "RequiredPropertiesMustBeDefined", IsRequired = false,
                   Description = "Specifies whether a required property must be defined in JSON (sets Required.Always when the property is required).")]
