@@ -245,6 +245,8 @@ namespace NSwag.CodeGeneration.PlSql.Models
             {
                 name = "pi_" + name; // "\"" + name + "\"";
             }
+            if (name.Length > 30)
+                name = name.Substring(0, 30);
             return name;
         }
 

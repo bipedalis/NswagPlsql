@@ -1,4 +1,4 @@
 ﻿{% if IsNotEnumeration -%}
 function get_json(v_model {{ClassName}}) return json;
-function get_json(v_list {{ClassName}}T) return json_list;
+procedure from_json(pi_data json_value, po_data in out {{ClassName}});
 {% endif -%}

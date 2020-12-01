@@ -22,7 +22,7 @@ return result_;
 {%     else -%}
 {%         if response.IsNullable == false -%}
 if v_res is null then
-    raise_application_error(-20000,'Response was null which was not expected.');
+    raise_application_error(-20000,c_rwn);
 end if;
 {%         endif -%}
 {%         if response.IsSuccess -%}

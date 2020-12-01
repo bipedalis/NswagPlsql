@@ -9,5 +9,5 @@ urlBuilder_.Replace("{{ "{" }}{{ parameter.Name }}}", System.Uri.EscapeDataStrin
 {% elseif parameter.IsArray -%}
 urlBuilder_.Replace("{{ "{" }}{{ parameter.Name }}}", System.Uri.EscapeDataString(string.Join(",", System.Linq.Enumerable.Select({{ parameter.VariableName }}, s_ => ConvertToString(s_, System.Globalization.CultureInfo.InvariantCulture)))));
 {% else -%}
-v_url := v_url || UTL_URL.ESCAPE('{{ parameter.Name }}') || '=' || UTL_URL.ESCAPE({% if parameter.IsNullable and parameter.IsRequired %}case when {{ parameter.VariableName }} is not null then  {% endif %}{% if parameter.IsVarchar %}{{ parameter.VariableName }}{% else %}ConvertToString({{ parameter.VariableName }}){% endif %}{% if parameter.IsNullable and parameter.IsRequired %} else '{{ QueryNullValue }}' end{% endif %}) || chr(38);
+v_url := replace( v_url,'{{ "{" }}{{ parameter.Name }}}',UTL_URL.ESCAPE(ConvertToString({{ parameter.VariableName }})));
 {% endif -%}

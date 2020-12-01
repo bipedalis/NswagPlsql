@@ -5,7 +5,7 @@
 {% for operation in Operations -%}
     {% template Client.Method.Documentation %}
     {% template Client.Method.Annotations %}
-    function {{ operation.ActualOperationName }}({% for parameter in operation.Parameters %}{{ parameter.VariableName }} {{ parameter.Type }}{% if parameter.IsLast == false %}, {% endif %}{% endfor %}) return nclob is -- {{ operation.ResultType }} is
+    function {{ operation.ActualOperationName }}({% for parameter in operation.Parameters %}{{ parameter.VariableName }} {{ parameter.SqlType }}{% if parameter.IsLast == false %}, {% endif %}{% endfor %}) return nclob is -- {{ operation.ResultType }} is
       v_url varchar2(512);
       v_res nclob;
       v_status_code pls_integer;
@@ -142,9 +142,7 @@
                 request_.Content = new System.Net.Http.StringContent(string.Empty, System.Text.Encoding.UTF8, "{{ operation.Produces }}");
 {%         endif -%}
 {%     endif -%}
-                --request_.Method = new System.Net.Http.HttpMethod("{{ operation.HttpMethodUpper | upcase }}");
 {%     if operation.HasResultType and operation.HasAcceptHeaderParameterParameter == false -%}
-              --  request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("{{ operation.Produces }}"));
 {%     endif -%}
                 {% template Client.Class.BeforeSend %}
                 u_web_pck.https_request('{{ operation.HttpMethodUpper | upcase }}',
@@ -200,6 +198,7 @@
                     else
 {%         endif -%}e
                         rae(v_status_code);
+                        return v_res;
                     end if;
 {%     endif -%}
     end {{ operation.ActualOperationName }};

@@ -49,7 +49,7 @@ namespace NJsonSchema.CodeGeneration.PlSql.Models
             get
             {
                 var t = _resolver.Resolve(_property, _property.IsNullable(_settings.SchemaType), GetTypeNameHint());
-                if(t== _className)
+                if(t== _className || t== "HearingDtoT" || t== "HearingDto") 
                 {
                     t = "clob"; // rekursiju neatbalsta
                 }

@@ -48,35 +48,63 @@ namespace NSwag.CodeGeneration.PlSql.Models
             _settings = settings;
             _resolver = resolver;
             var toJsonFunctions = dtoTypes.Where(c => c.Type == CodeArtifactType.Function).ToList();
-            SortByDependencies(toJsonFunctions);
+            var circ1= SortByDependencies(toJsonFunctions);
             _clientCode = toJsonFunctions.Concat( clientTypes.Where(c => c.Category == CodeArtifactCategory.Client))
                 .Concatenate();
             _interfaceCode = clientTypes.Where(c => c.Category == CodeArtifactCategory.Contract)
                 //.Concat(dtoTypes.Where(c => c.Type == CodeArtifactType.Interface))
+                // hack methods to convert create request to update request
+                .Concat(dtoTypes.Where(c => c.Type == CodeArtifactType.Interface 
+                && (c.TypeName.StartsWith("Create") || c.TypeName.StartsWith("Update")) &&
+                !c.TypeName.EndsWith("T")))
                 .Concatenate();
             var dto = dtoTypes.Where(c => c.Type != CodeArtifactType.Interface && c.Type != CodeArtifactType.Function).OrderByBaseDependency().ToList();
-            SortByDependencies(dto);
+            var circ2 = SortByDependencies(dto);
             Classes = dto.Concatenate();
             _baseUrl = _document.BaseUrl;
         }
 
-        private static void SortByDependencies(List<CodeArtifact> dto)
+        private static IList<string> SortByDependencies(List<CodeArtifact> dto)
         {
             var i = dto.Count - 1;
+            int lastJ =-1;
+            IList<string> circular = new List<string>();
             do
             {
                 var j = dto.FindIndex(a => a.Code.Contains(" " + dto[i].TypeName + " ") || a.Code.Contains(" " + dto[i].TypeName + "T "));
+
                 if (j >= 0 && j < i)
                 {
-                    var t = dto[j];
-                    dto[j] = dto[i];
-                    dto[i] = t;
+                    if (lastJ == j)
+                    {
+                        //throw new System.Exception("Recursive models");
+                        if (dto[j].Code.Contains(" " + dto[i].TypeName + "T "))
+                        {
+                            var t = dto[j];
+                            dto[j] = dto[i];
+                            dto[i] = t;
+                            //circular.Add(dto[j].TypeName);
+                        }
+                        circular.Add(dto[i].TypeName);
+                        dto[j] = new CodeArtifact(dto[j].TypeName,dto[j].Type,dto[j].Language,
+                            dto[j].Category, dto[j].Code.Replace(" " + dto[i].TypeName + " ", " nclob "));
+                        //i--;
+                    }
+                    else
+                    {
+                        var t = dto[j];
+                        dto[j] = dto[i];
+                        dto[i] = t;
+                        lastJ = j;
+                    }
                 }
                 else
                 {
                     i--;
+                    lastJ = -1;
                 }
             } while (i > 0);
+            return circular;
         }
 
         /// <summary>Gets the namespace.</summary>
