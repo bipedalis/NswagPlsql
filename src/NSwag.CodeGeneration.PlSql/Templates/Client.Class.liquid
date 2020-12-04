@@ -206,7 +206,7 @@
     procedure {{ operation.ActualOperationName }}P({% for parameter in operation.Parameters %}{{ parameter.VariableName }} {{ parameter.Type }}{% if parameter.IsLast == false %}, {% endif %}{% endfor %}, po_result out {{ operation.ResultType }}) as
     begin
         from_json(json(
-        {{ operation.ActualOperationName }}({% for parameter in operation.Parameters %}{{ parameter.VariableName }} {% if parameter.IsLast == false %}, {% endif %}{% endfor %})).to_json_value(),
+        {{ operation.ActualOperationName }}({% for parameter in operation.Parameters %}{% if parameter.IsBool %}sys.diutil.bool_to_int({{ parameter.VariableName }}){% else %}{{ parameter.VariableName }}{% endif%} {% if parameter.IsLast == false %}, {% endif %}{% endfor %})).to_json_value(),
         po_result);
     end {{ operation.ActualOperationName }}P;
     {% if operation.IsVeryComplex %}
@@ -214,7 +214,7 @@
         v_paged {{ operation.ResultType }};
     begin
         from_json(json(
-        {{ operation.ActualOperationName }}({% for parameter in operation.Parameters %}{{ parameter.VariableName }} {% if parameter.IsLast == false %}, {% endif %}{% endfor %})).to_json_value(),
+        {{ operation.ActualOperationName }}({% for parameter in operation.Parameters %}{% if parameter.IsBool %}sys.diutil.bool_to_int({{ parameter.VariableName }}){% else %}{{ parameter.VariableName }}{% endif%} {% if parameter.IsLast == false %}, {% endif %}{% endfor %})).to_json_value(),
         v_paged);
         po_result := v_paged.m_items;
         po_totalPages := v_paged.m_totalPages;

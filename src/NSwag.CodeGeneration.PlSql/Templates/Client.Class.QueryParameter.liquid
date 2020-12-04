@@ -35,5 +35,5 @@ if ({{parameter.Name}}.{{property.Name}} != null)
 }
 {%     endfor -%}
 {% else -%}
-v_url := v_url || UTL_URL.ESCAPE('{{ parameter.Name }}') || '=' || UTL_URL.ESCAPE({% if parameter.IsNullable and parameter.IsRequired %}{{ parameter.VariableName }} != null ? {% endif %}{% if parameter.IsVarchar %}{{ parameter.VariableName }}{% else %}ConvertToString({{ parameter.VariableName }}){% endif %}{% if parameter.IsNullable and parameter.IsRequired %} : '{{ QueryNullValue }}'{% endif %}) || chr(38);
+v_url := v_url || UTL_URL.ESCAPE('{{ parameter.Name }}') || '=' || UTL_URL.ESCAPE({% if parameter.IsNullable and parameter.IsRequired %}{{ parameter.VariableName }} != null ? {% endif %}{% if parameter.IsVarchar %}{{ parameter.VariableName }}{% elsif parameter.IsBool %}ConvertToBoolString({{ parameter.VariableName }}){% else %}ConvertToString({{ parameter.VariableName }}){% endif %}{% if parameter.IsNullable and parameter.IsRequired %} : '{{ QueryNullValue }}'{% endif %}) || chr(38);
 {% endif -%}
