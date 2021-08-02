@@ -5,7 +5,7 @@ function get_json(v_model {{ClassName}}) return json as
     if v_model.m_isNull then
         return null;
     end if;
-{% for property in Properties -%}
+{% for property in AllProperties -%}
 {% if(property.IsComplex) -%}
      v_json.put('{{property.JsonName}}', get_json(v_model.{{property.FieldName}})); -- {{property.Type}} 
 {% else -%}
@@ -35,7 +35,7 @@ procedure from_json(pi_data json_value, po_data in out {{ClassName}} ) as
         if pi_data is not null then
             po_data.m_isNull := false;
             j := json(pi_data);
-{% for property in Properties -%}
+{% for property in AllProperties -%}
             if j.exist('{{property.JsonName}}') and not j.get('{{property.JsonName}}').is_null() then
 {%    if(property.IsComplex) -%}
                 -- {{property.Type}} 
@@ -52,8 +52,14 @@ procedure from_json(pi_data json_value, po_data in out {{ClassName}} ) as
                 po_data.{{property.FieldName}} := j.get('{{property.JsonName}}').get_bool();        
   {% when "clob" -%}
                 po_data.{{property.FieldName}} := j.get('{{property.JsonName}}').to_char();
+  {% when "Date" -%}
+                po_data.{{property.FieldName}} := cast( to_timestamp(j.get('{{property.JsonName}}').get_string(), c_tsf) as date );
   {% else %}
-                null; //-- {{property.Type}}
+    {%    if(property.IsString) -%}
+                po_data.{{property.FieldName}} := j.get('{{property.JsonName}}').get_string(); -- {{property.Type}}
+    {% else %}
+                null; -- {{property.Type}}
+    {% endif -%}
   {% endcase -%}
 {% endif -%}
             end if;

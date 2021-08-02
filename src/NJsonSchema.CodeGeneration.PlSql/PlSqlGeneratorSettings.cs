@@ -66,5 +66,15 @@ namespace NJsonSchema.CodeGeneration.PlSql
         public bool GenerateNullableReferenceTypes { get; set; }
         /// <summary>Gets or sets a value indicating whether to render ToJson() and FromJson() methods (default: true).</summary>
         public bool GenerateJsonMethods { get; set; }
+        /// <summary>Gets or sets type  names which require public from_json methods.</summary>
+        public string PublicFromJsonMethods { get; set; }
+        /// <summary>Gets or sets field names which contain long (>1024) string.</summary>
+        public string LongStrings { get; set; }
+        /// <summary>
+        /// Data type too complex for Oracle (depth>8)
+        /// </summary>
+        public string ComplexTypes { get; set; }
+        
+
     }
 }

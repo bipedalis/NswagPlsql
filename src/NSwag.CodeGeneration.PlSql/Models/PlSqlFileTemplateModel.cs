@@ -60,10 +60,141 @@ namespace NSwag.CodeGeneration.PlSql.Models
                 .Concatenate();
             var dto = dtoTypes.Where(c => c.Type != CodeArtifactType.Interface && c.Type != CodeArtifactType.Function).OrderByBaseDependency().ToList();
             var circ2 = SortByDependencies(dto);
-            Classes = dto.Concatenate();
+            Classes = dto.Where(p => p.TypeName != "Void").Concatenate();
+            FindDeepTypes(document);
             _baseUrl = _document.BaseUrl;
         }
+        private string GetTypeName(NJsonSchema.JsonSchema schema)
+        {
+            try
+            {
+                return _resolver.Types[schema];
+            }
+            catch (System.Exception ex)
+            {
+                return null;
+            }
+        }
+        private string GetTypeNameIfOk(NJsonSchema.JsonSchema schema, string path)
+        {
+            string typeName = GetTypeName(schema);
+            if (_settings.PlSqlGeneratorSettings.ExcludedTypeNames.Contains(typeName))
+            {
+                System.Diagnostics.Debug.WriteLine("Excluded type " + typeName);
+                typeName = null;
+            }
+            else if (path.Contains(":" + typeName))
+            {
+                System.Diagnostics.Debug.WriteLine("Recursive type " + typeName);
+                typeName = null;
+            }
+            return typeName;
+        }
+    private string IsDeeperThen(IReadOnlyDictionary<string,NJsonSchema.JsonSchemaProperty> props, int depth, string root)
+        {
+            if (depth <= 0 || (depth == 1 && props.Count>0))
+                return root + " -> END";
+            foreach (var prop in props)
+            {
+                string typeName = null;
+                string path = null;
+                if (prop.Value.IsArray)
+                {
+                    if (prop.Value.Item.ActualSchema.IsObject)
+                    {
+                        typeName = GetTypeNameIfOk(prop.Value.Item.ActualTypeSchema, root);
+                        if (typeName != null)
+                        {
+                            path = IsDeeperThen(prop.Value.Item.ActualSchema.ActualProperties, depth - 2, root + " -> " + prop.Key + ":" + typeName + "T");
+                        }
+                    }
+                    //if (path != null)
+                    //{
+                    //    typeName = GetTypeName(prop.Value.Item.ActualTypeSchema) + "T";
+                    //}
+                }
+                else if (prop.Value.ActualSchema.IsObject)
+                {
+                    if (prop.Value.ActualSchema.ActualProperties.Count>0)
+                    {
+                        typeName = GetTypeNameIfOk(prop.Value.ActualTypeSchema, root);
+                        if (typeName != null)
+                            path = (IsDeeperThen(prop.Value.ActualSchema.ActualProperties, depth - 1, root + " -> " + prop.Key + ":" + typeName));
+                    }
+                    else if (prop.Value.Item != null)
+                    {
+                        typeName = GetTypeNameIfOk(prop.Value.Item.ActualTypeSchema, root);
+                        if (typeName != null)
+                            path = (IsDeeperThen(prop.Value.Item.ActualSchema.ActualProperties, depth - 1, root + " -> " + prop.Key + ":" + typeName));
+                    }
+                }
+                if (path != null)
+                {
+                    return path;
+                    //if (_settings.PlSqlGeneratorSettings.ExcludedTypeNames.Contains(typeName))
+                    //{
+                    //    System.Diagnostics.Debug.WriteLine("Excluded type " + typeName);
+                    //}
+                    //else if (root.Contains(":" + typeName))
+                    //{
+                    //    System.Diagnostics.Debug.WriteLine("Recursive type " + typeName);
+                    //}
+                    //else
+                    //{
+                    //    return path; // prop.Key + ":" + typeName + " -> " + path;
+                    //}
+                }
+            }
+            return null;
+        }
+        private  IList<string> FindDeepTypes(OpenApiDocument document)
+        {
+            IList<string> deep8 = new List<string>();
+            IList<string> tns = new List<string>();
+            IList<string> ops = new List<string>();
 
+            foreach (var def in document.Definitions)
+            {
+                string tn = GetTypeNameIfOk(def.Value, "");
+                if (tn != null)
+                {
+                    string path = (IsDeeperThen(def.Value.ActualProperties, 7, ":" + tn));
+                    if (path != null)
+                    {
+                        deep8.Add(path);
+                        tns.Add(tn);
+                    }
+                }
+            }
+            foreach (var op in document.Operations)
+            {
+                foreach (var par in op.Operation.Parameters)
+                {
+                    if (par.ActualTypeSchema.IsObject)
+                    {
+                        if (tns.Contains(GetTypeName(par.ActualTypeSchema)))
+                        {
+                            ops.Add(op.Method);
+                            break;
+                        };
+                    }
+                }
+
+                foreach (var r in op.Operation.ActualResponses)
+                {
+                    if (r.Value.Schema != null && r.Value.Schema.IsObject)
+                    {
+                        if (tns.Contains(GetTypeName(r.Value.Schema)))
+                        {
+                            ops.Add(op.Method);
+                            break;
+                        };
+                    }
+                }
+            }
+                
+            return deep8;
+        }
         private static IList<string> SortByDependencies(List<CodeArtifact> dto)
         {
             var i = dto.Count - 1;
@@ -87,7 +218,8 @@ namespace NSwag.CodeGeneration.PlSql.Models
                         }
                         circular.Add(dto[i].TypeName);
                         dto[j] = new CodeArtifact(dto[j].TypeName,dto[j].Type,dto[j].Language,
-                            dto[j].Category, dto[j].Code.Replace(" " + dto[i].TypeName + " ", " nclob "));
+                            dto[j].Category, dto[j].Code.Replace(" " + dto[i].TypeName + " ", " nclob ").
+                            Replace(" " + dto[i].TypeName + "T ", " nclobT "));
                         //i--;
                     }
                     else
@@ -114,6 +246,18 @@ namespace NSwag.CodeGeneration.PlSql.Models
         public string[] NamespaceUsages => (_outputType == ClientGeneratorOutputType.Contracts ?
             _settings.AdditionalContractNamespaceUsages?.Where(n => n != null).ToArray() :
             _settings.AdditionalNamespaceUsages?.Where(n => n != null).ToArray()) ?? new string[] { };
+
+        /// <summary>Gets PublicFromJsonMethods.</summary>
+        public string[] PublicFromJsonMethods => string.IsNullOrWhiteSpace( _settings.PlSqlGeneratorSettings.PublicFromJsonMethods) ? new string[0] : _settings.PlSqlGeneratorSettings.PublicFromJsonMethods.Split(',');
+
+        /// <summary>Gets PublicFromJsonMethods.</summary>
+        public string[] LongStrings => string.IsNullOrWhiteSpace(_settings.PlSqlGeneratorSettings.LongStrings) ? new string[0] : _settings.PlSqlGeneratorSettings.LongStrings.Split(',');
+        /// <summary>Gets PublicFromJsonMethods.</summary>
+        public string[] ComplexTypes => string.IsNullOrWhiteSpace(_settings.PlSqlGeneratorSettings.ComplexTypes) ? new string[0] : _settings.PlSqlGeneratorSettings.ComplexTypes.Split(',');
+
+
+        /// <summary>Gets GenerateJsonMethods.</summary>
+        public bool GenerateJsonMethods => _settings.PlSqlGeneratorSettings.GenerateJsonMethods;
 
         /// <summary>Gets a value indicating whether the C#8 nullable reference types are enabled for this file.</summary>
         public bool GenerateNullableReferenceTypes => _settings.PlSqlGeneratorSettings.GenerateNullableReferenceTypes;

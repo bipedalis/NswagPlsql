@@ -160,7 +160,7 @@ namespace NJsonSchema.CodeGeneration.PlSql
         {
             if (schema.Format == JsonFormatStrings.Date)
             {
-                return isNullable && Settings.DateType?.ToLowerInvariant() != "string" ? Settings.DateType + "?" : Settings.DateType;
+                return Settings.DateType; // isNullable && Settings.DateType?.ToLowerInvariant() != "string" ? Settings.DateType + "?" : Settings.DateType;
             }
 
             if (schema.Format == JsonFormatStrings.DateTime)
@@ -240,17 +240,18 @@ namespace NJsonSchema.CodeGeneration.PlSql
 
         private static string ResolveNumber(JsonSchema schema, bool isNullable)
         {
-            if (schema.Format == JsonFormatStrings.Decimal)
-            {
-                return isNullable ? "decimal?" : "decimal";
-            }
+            return "number";
+            //if (schema.Format == JsonFormatStrings.Decimal)
+            //{
+            //    return isNullable ? "decimal?" : "decimal";
+            //}
 
-            if (schema.Format == JsonFormatStrings.Float)
-            {
-                return isNullable ? "float?" : "float";
-            }
+            //if (schema.Format == JsonFormatStrings.Float)
+            //{
+            //    return isNullable ? "float?" : "float";
+            //}
 
-            return isNullable ? "double?" : "double";
+            //return isNullable ? "double?" : "double";
         }
 
         private string ResolveArrayOrTuple(JsonSchema schema)

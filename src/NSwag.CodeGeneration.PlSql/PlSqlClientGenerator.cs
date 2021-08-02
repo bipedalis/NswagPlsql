@@ -59,12 +59,13 @@ namespace NSwag.CodeGeneration.PlSql
             var model = new PlSqlClientTemplateModel(controllerName, controllerClassName, operations, exceptionSchema, _document, Settings);
             if (model.HasOperations)
             {
-                var ops = model.Operations.Select(o => new Tuple<PlSqlOperationModel, string>(o, o.ActualOperationName + o.Parameters.Select(p => p.Type).Aggregate((p1, p2) => p1 + p2)));
+                var ops = model.Operations.Select(o => new Tuple<PlSqlOperationModel, string>(o, o.ActualOperationName + ((o.Parameters.Count>0)? o.Parameters.Select(p => p.Type).ToArray().Aggregate((p1, p2) => p1 + p2) : "")));
                 foreach(var op in ops)
                 {
+
                     if(_ops.Contains(op.Item2))
                     {
-                        op.Item1.OperationName = op.Item1.OperationName + "2";
+                        op.Item1.OperationName = op.Item1.OperationName + _ops.Count(p => p == op.Item2).ToString(); // "2";
                     }
                     _ops.Add(op.Item2);
                 }

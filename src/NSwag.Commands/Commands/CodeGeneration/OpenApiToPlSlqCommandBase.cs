@@ -67,6 +67,28 @@ namespace NSwag.Commands.CodeGeneration
             set { Settings.PlSqlGeneratorSettings.GenerateJsonMethods = value; }
         }
 
+        [Argument(Name = "PublicFromJsonMethods", IsRequired = false,
+            Description = "Specifies type  names which require public from_json methods (OperationResponseModel).")]
+        public string PublicFromJsonMethods
+        {
+            get { return Settings.PlSqlGeneratorSettings.PublicFromJsonMethods; }
+            set { Settings.PlSqlGeneratorSettings.PublicFromJsonMethods = value; }
+        }
+        [Argument(Name = "LongStrings", IsRequired = false,
+    Description = "Field names which contain long (>1024) string.")]
+        public string LongStrings
+        {
+            get { return Settings.PlSqlGeneratorSettings.LongStrings; }
+            set { Settings.PlSqlGeneratorSettings.LongStrings = value; }
+        }
+        [Argument(Name = "ComplexTypes", IsRequired = false,
+   Description = "Complex types (depth>8), try to decompose if in param list.")]
+        public string ComplexTypes
+        {
+            get { return Settings.PlSqlGeneratorSettings.ComplexTypes; }
+            set { Settings.PlSqlGeneratorSettings.ComplexTypes = value; }
+        }
+
         [Argument(Name = "EnforceFlagEnums", IsRequired = false,
             Description = "Specifies whether enums should be always generated as bit flags (default: false).")]
         public bool EnforceFlagEnums

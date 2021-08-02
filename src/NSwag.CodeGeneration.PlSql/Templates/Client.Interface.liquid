@@ -2,8 +2,8 @@
 {% for operation in InterfaceOperations -%}
     {% template Client.Method.Documentation %}
     {% template Client.Method.Annotations %}
-    function {{ operation.ActualOperationName }}({% for parameter in operation.Parameters %}{{ parameter.VariableName }} {{ parameter.SqlType }}{% if parameter.IsLast == false %}, {% endif %}{% endfor %}) return nclob;
-    {% if operation.HasResult %}    
-    procedure {{ operation.ActualOperationName }}P({% for parameter in operation.Parameters %}{{ parameter.VariableName }} {{ parameter.Type }}{% if parameter.IsLast == false %}, {% endif %}{% endfor %}, po_result out {% if operation.IsVeryComplex %}{{ operation.ItemsResultType }} , po_totalPages out number {% else -%} {{ operation.ResultType }} {% endif -%});
+    function {{ operation.ActualOperationName }}{% if operation.HasParams %}({% for parameter in operation.Parameters %}{{ parameter.VariableName }} {{ parameter.SqlType }}{% if parameter.IsLast == false %}, {% endif %}{% endfor %}){% endif %} return {% if operation.HasResult %}nclob{% else %}blob{% endif %};
+    {% if operation.HasResult %}
+    procedure {{ operation.ActualOperationName }}P({% if operation.HasParams %}{% for parameter in operation.Parameters %}{{ parameter.VariableName }} {{ parameter.Type }}{% if parameter.IsLast == false %}, {% endif %}{% endfor %},{% endif %} po_result out {% if operation.IsVeryComplex %}{{ operation.ItemsResultType }} , po_totalPages out number {% else -%} {{ operation.ResultType }} {% endif -%});
     {% endif %}
 {% endfor -%}

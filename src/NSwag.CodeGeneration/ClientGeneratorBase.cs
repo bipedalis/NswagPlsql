@@ -81,7 +81,7 @@ namespace NSwag.CodeGeneration
                 outputType == ClientGeneratorOutputType.Implementation ? clientTypes.Where(t => t.Category != CodeArtifactCategory.Contract) :
                 outputType == ClientGeneratorOutputType.Contracts ? clientTypes.Where(t => t.Category == CodeArtifactCategory.Contract) :
                 Enumerable.Empty<CodeArtifact>();
-
+            //clientTypes = clientTypes.Where(p => p.Code)
             dtoTypes =
                 outputType == ClientGeneratorOutputType.Full ||
                 outputType == ClientGeneratorOutputType.Contracts ? dtoTypes : Enumerable.Empty<CodeArtifact>();

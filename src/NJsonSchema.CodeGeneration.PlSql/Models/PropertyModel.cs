@@ -222,6 +222,10 @@ namespace NJsonSchema.CodeGeneration.PlSql.Models
 
         /// <summary>Gets a value indicating whether the property type is string enum.</summary>
         public bool IsStringEnum => _property.ActualTypeSchema.IsEnumeration && _property.ActualTypeSchema.Type.HasFlag(JsonObjectType.String);
+        /// <summary>
+        /// 
+        /// </summary>
+        public bool IsString => !_property.ActualTypeSchema.IsEnumeration && _property.ActualTypeSchema.Type.HasFlag(JsonObjectType.String);
 
         /// <summary>Gets a value indicating whether the property should be formatted like a date.</summary>
         public bool IsDate => _property.ActualSchema.Format == JsonFormatStrings.Date;

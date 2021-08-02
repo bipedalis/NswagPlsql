@@ -9,8 +9,11 @@
 {% if GenerateContracts -%}
     type RAW_16_T is table of raw(16);
     type VARCHAR2_1024_T is table of varchar2(1024);
+    type CLOBT is table of clob;
+    type NCLOBT is table of nclob;
 
     c_baseUrl varchar2(128) := '{{ BaseUrl }}';
+    c_tsf     varchar2(30) := 'RRRR-MM-DD"T"HH24:MI:SS.FF"Z"';
     c_rwn varchar2(50) := 'Response was null which was not expected.';
     {{ Classes | tab }}
 
@@ -45,7 +48,12 @@
 {%         endfor %}
 {%     endif -%}
 ---------- Interface
-    procedure from_json(pi_data json_value, po_data in out OperationResponseModel ); -- hack
+{% for meth in PublicFromJsonMethods %}
+    procedure from_json(pi_data json_value, po_data in out {{ meth }} ); -- hack
+    procedure from_json(pi_data json_value, po_data in out {{ meth }}T );
+    function get_json(v_model {{meth}}) return json;
+    function get_json(v_list {{meth}}T) return json_list;
+{% endfor %}
     {{ Interfaces | tab }}
 ---------- Interface
 {%     endif -%}
@@ -131,6 +139,22 @@ function get_json(v_list VARCHAR2_1024_T) return json_list as
      end loop;
      return v_json_list;
    end;
+function get_json(v_list CLOBT) return json_list as
+     v_json_list json_list := json_list();
+   begin
+     for i in v_list.first .. v_list.last loop
+       v_json_list.append( v_list(i));
+     end loop;
+     return v_json_list;
+   end;
+function get_json(v_list NCLOBT) return json_list as
+     v_json_list json_list := json_list();
+   begin
+     for i in v_list.first .. v_list.last loop
+       v_json_list.append( v_list(i));
+     end loop;
+     return v_json_list;
+   end;
 procedure from_json(pi_data json_value, po_data in out VARCHAR2_1024_T ) as 
      v_json_list json_list;
   begin     
@@ -142,6 +166,47 @@ procedure from_json(pi_data json_value, po_data in out VARCHAR2_1024_T ) as
          end loop;  
      end if;
    end;  
+procedure from_json(pi_data json_value, po_data in out CLOBT ) as
+     v_json_list json_list;
+     v_text json_value;
+  begin
+	 v_json_list := json_list(pi_data);
+       po_data := new CLOBT();
+     if v_json_list.count>0 then
+       po_data.extend(v_json_list.count);
+         po_data.extend(v_json_list.count);
+         for i in 1 .. v_json_list.count loop
+           v_text := v_json_list.get(i);
+           if v_text.is_object() then
+             dbms_lob.createtemporary(po_data(i), TRUE);
+             v_text.to_clob(po_data(i), TRUE);
+           else  
+            po_data(i) := v_json_list.get(i).get_string();
+           end if;             
+         end loop;
+     end if;
+   end;
+procedure from_json(pi_data json_value, po_data in out NCLOBT ) as
+     v_json_list json_list;
+     v_text json_value;
+  begin
+	 v_json_list := json_list(pi_data);
+       po_data := new NCLOBT();
+     if v_json_list.count>0 then
+       po_data.extend(v_json_list.count);
+         po_data.extend(v_json_list.count);
+         for i in 1 .. v_json_list.count loop
+           v_text := v_json_list.get(i);
+           if v_text.is_object() then
+             dbms_lob.createtemporary(po_data(i), TRUE);
+             v_text.to_clob(po_data(i), TRUE);
+           else  
+            po_data(i) := v_json_list.get(i).get_string();
+           end if;             
+         end loop;
+     end if;
+   end;
+
 procedure from_json(pi_data json_value, po_data in out RAW_16_T ) as 
      v_json_list json_list;
   begin

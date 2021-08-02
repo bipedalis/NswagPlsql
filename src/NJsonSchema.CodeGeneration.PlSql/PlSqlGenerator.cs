@@ -81,7 +81,43 @@ namespace NJsonSchema.CodeGeneration.PlSql
                 artifacts.AddRange(GenerateConvertFunctions());               
 
             }
-            return baseArtifacts.Concat(artifacts);
+            List<CodeArtifact> filtered = new List<CodeArtifact>();
+            foreach (var art in baseArtifacts.Concat(artifacts))
+            {
+                string code = art.Code;
+                foreach (string t in Settings.ExcludedTypeNames)
+                {
+                    if (code.Contains(" " + t + " "))
+                    {
+                        code = code.Replace(" " + t + " ", " nclob ");
+                    }
+                    if (code.Contains(" " + t + "T "))
+                    {
+                        code = code.Replace(" " + t + "T ", " nclobT ");
+                    }
+                }
+                if(art.Type != CodeArtifactType.Interface && art.Type != CodeArtifactType.Function
+                    && (code.Contains(" " + art.TypeName + "T ,") || code.Contains(" " + art.TypeName + "T  ")))
+                {
+                    code = code.Replace(" " + art.TypeName + "T ,", " nclobT ,");
+                    code = code.Replace(" " + art.TypeName + "T  ", " nclobT  ");
+                }
+                if (code != art.Code)
+                {
+                    filtered.Add(CloneCodeArtifact(art, code));
+                }
+                else
+                {
+                    filtered.Add(art);
+                }
+            }
+            return filtered;
+
+        }
+        private CodeArtifact CloneCodeArtifact(CodeArtifact old, string newCode)
+        {
+            return new CodeArtifact(old.TypeName, old.Type, old.Language,
+                old.Category, newCode);
         }
         /// <summary>
         /// 
@@ -103,9 +139,8 @@ namespace NJsonSchema.CodeGeneration.PlSql
                 }
             }
 
-            var artifacts = types.Values;
-                //.Where(p => !_settings.ExcludedTypeNames.Contains(p.TypeName));
-
+            var artifacts = types.Values
+                .Where(p => !Settings.ExcludedTypeNames.Contains(p.TypeName));
             return artifacts;
         }
         /// <inheritdoc />

@@ -3,10 +3,9 @@
 {% endif -%}
 
  type {{ClassName}} is record
-({% assign sep = "" %}
-    m_isNull boolean default true,
-{% for property in Properties -%}
-{{ sep }}{% assign sep = "," %}
+(
+    m_isNull boolean default true
+{% for property in AllProperties -%},
     {{ property.FieldName }} {{ property.Type }} {% if property.HasDefaultValue %} default {{ property.DefaultValue }} {% endif -%}
 {% endfor -%}
  
