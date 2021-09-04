@@ -5,13 +5,13 @@
 {% for operation in Operations -%}
     {% template Client.Method.Documentation %}
     {% template Client.Method.Annotations %}
-    function {{ operation.ActualOperationName }}{% if operation.HasParams %}({% for parameter in operation.Parameters %}{{ parameter.VariableName }} {{ parameter.SqlType }}{% if parameter.IsLast == false %}, {% endif %}{% endfor %}) {% endif %} return {% if operation.HasResult %}nclob{% else %}blob{% endif %} is -- {{ operation.ResultType }} is
+    function {{ operation.ActualOperationName }}{% if operation.HasParams %}({% for parameter in operation.Parameters %}{{ parameter.VariableName }} {{ parameter.SqlType }}{% if parameter.IsLast == false %}, {% endif %}{% endfor %}) {% endif %} return {% if operation.BlobResult %}blob{% else %}nclob{% endif %} is -- {{ operation.ResultType }} is
       v_url varchar2(512);
-      {% if operation.HasResult -%}
-      v_res nclob;
-      {% else -%}
+      {% if operation.BlobResult -%}
       v_res_clob nclob;
       v_res blob;
+      {% else -%}
+      v_res nclob;
       {% endif -%}
       v_status_code pls_integer;
       content_ nclob;
@@ -157,13 +157,11 @@
                 u_web_pck.https_request('{{ operation.HttpMethodUpper | upcase }}',
                 v_url,
                 content_,
-                {% if operation.HasResult -%}
-                v_res,
-                {% else -%}
+                {% if operation.BlobResult -%}
                 true,
                 v_res_clob,
-                v_res,
                 {% endif -%}
+                v_res,
                 v_status_code
                 );
                 {%     for response in operation.Responses -%}if v_status_code = {{ response.StatusCode }}{% if response.CheckChunkedStatusCode %} or v_status_code = 206{% endif %} then
@@ -221,6 +219,15 @@ els{%         endif -%}e
         po_result := v_paged.m_items;
         po_totalPages := v_paged.m_totalPages;
     end {{ operation.ActualOperationName }}P;    
+
+    
+    procedure {{operation.FromJsonItemsProcName}}(pi_data nclob, po_result out {{ operation.ItemsResultType }}) as
+        v_paged  {{ operation.ResultType }};
+    begin
+        from_json(json(pi_data).to_json_value(), v_paged);
+        po_result := v_paged.m_items;
+    end {{operation.FromJsonItemsProcName}};
+
     {% endif -%}
 
     {% endif %}

@@ -55,6 +55,9 @@ namespace NSwag.CodeGeneration.PlSql
         /// <summary>Gets or sets the additional contract namespace usages.</summary>
         public string[] AdditionalContractNamespaceUsages { get; set; }
 
+        public string[] ComplexTypes => string.IsNullOrWhiteSpace(PlSqlGeneratorSettings.ComplexTypes) ? new string[0] : PlSqlGeneratorSettings.ComplexTypes.Split(',');
+
+
         /// <summary>Gets or sets the array type of operation responses (i.e. the method return type).</summary>
         public string ResponseArrayType { get; set; }
 

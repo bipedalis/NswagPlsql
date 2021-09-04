@@ -46,6 +46,8 @@ procedure from_json(pi_data json_value, po_data in out {{ClassName}} ) as
                 po_data.{{property.FieldName}} := j.get('{{property.JsonName}}').get_string();
   {% when "PLS_INTEGER" -%}
                 po_data.{{property.FieldName}} := j.get('{{property.JsonName}}').get_number();
+  {% when "number" -%}
+                po_data.{{property.FieldName}} := j.get('{{property.JsonName}}').get_number();
   {% when "RAW(16)" -%}
                 po_data.{{property.FieldName}} := replace(j.get('{{property.JsonName}}').get_string(),'-','');
   {% when "boolean" -%}

@@ -55,7 +55,7 @@ namespace NSwag.CodeGeneration.PlSql.Models
                 //.Concat(dtoTypes.Where(c => c.Type == CodeArtifactType.Interface))
                 // hack methods to convert create request to update request
                 .Concat(dtoTypes.Where(c => c.Type == CodeArtifactType.Interface 
-                && (c.TypeName.StartsWith("Create") || c.TypeName.StartsWith("Update")) &&
+                && (c.TypeName.StartsWith("Create") || c.TypeName.StartsWith("Update") || c.TypeName.StartsWith("PublicCreate") || c.TypeName.StartsWith("PublicUpdate")) &&
                 !c.TypeName.EndsWith("T")))
                 .Concatenate();
             var dto = dtoTypes.Where(c => c.Type != CodeArtifactType.Interface && c.Type != CodeArtifactType.Function).OrderByBaseDependency().ToList();

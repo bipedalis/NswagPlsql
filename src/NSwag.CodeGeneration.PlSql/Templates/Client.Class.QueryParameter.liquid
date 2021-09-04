@@ -35,5 +35,9 @@ if ({{parameter.Name}}.{{property.Name}} != null)
 }
 {%     endfor -%}
 {% else -%}
+{% if parameter.IsFreeFormQuery -%}
+v_url := v_url || get_free_form_query({{ parameter.VariableName }});
+{% else -%}
 v_url := v_url || UTL_URL.ESCAPE('{{ parameter.Name }}') || '=' || UTL_URL.ESCAPE({% if parameter.IsNullable and parameter.IsRequired %}{{ parameter.VariableName }} != null ? {% endif %}{% if parameter.IsVarchar %}{{ parameter.VariableName }}{% elsif parameter.IsBool %}ConvertToBoolString({{ parameter.VariableName }}){% else %}ConvertToString({{ parameter.VariableName }}){% endif %}{% if parameter.IsNullable and parameter.IsRequired %} : '{{ QueryNullValue }}'{% endif %}) || chr(38);
+{% endif -%}
 {% endif -%}

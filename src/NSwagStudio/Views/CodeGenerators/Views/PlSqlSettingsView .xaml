@@ -26,25 +26,6 @@
                 <TextBox Text="{Binding Command.ExcludedTypeNames, Mode=TwoWay, Converter={StaticResource StringArrayConverter}, ConverterParameter=','}" 
                          ToolTip="ExcludedTypeNames" Margin="0,0,0,12" />
 
-                <TextBlock Text="DTO class/enum access modifier" FontWeight="Bold" Margin="0,0,0,6" />
-                <TextBox Text="{Binding Command.TypeAccessModifier, Mode=TwoWay}" 
-                         ToolTip="TypeAccessModifier" Margin="0,0,0,12" />
-
-                <CheckBox IsChecked="{Binding Command.GenerateDefaultValues, Mode=TwoWay}" 
-                          ToolTip="GenerateDefaultValues" Margin="0,0,0,12">
-                    <TextBlock Text="Generate default values for properties (if default value is specified)" TextWrapping="Wrap" />
-                </CheckBox>
-
-                <CheckBox IsChecked="{Binding Command.GenerateImmutableArrayProperties, Mode=OneWay}" 
-                          ToolTip="GenerateImmutableArrayProperties" Margin="0,0,0,12">
-                    <TextBlock Text="Remove the setter for non-nullable array properties" TextWrapping="Wrap" />
-                </CheckBox>
-
-                <CheckBox IsChecked="{Binding Command.GenerateImmutableDictionaryProperties, Mode=OneWay}" 
-                          ToolTip="GenerateImmutableDictionaryProperties" Margin="0,0,0,12">
-                    <TextBlock Text="Remove the setter for non-nullable dictionary properties" TextWrapping="Wrap" />
-                </CheckBox>
-
                 <CheckBox IsChecked="{Binding Command.GenerateDataAnnotations, Mode=OneWay}" 
                           ToolTip="GenerateDataAnnotations" Margin="0,0,0,12">
                     <TextBlock Text="Generate data annotation attributes" TextWrapping="Wrap" />
@@ -62,65 +43,17 @@
                 <TextBlock Text="LongStrings:" FontWeight="Bold"
                                    Margin="0,0,0,6" />
                 <TextBox Text="{Binding Command.LongStrings, Mode=TwoWay}" 
-                                 ToolTip="PublicFromJsonMethods"
+                                 ToolTip="LongStrings"
                                  Margin="0,0,0,12" />
                 <TextBlock Text="ComplexTypes:" FontWeight="Bold"
                                    Margin="0,0,0,6" />
                 <TextBox Text="{Binding Command.ComplexTypes, Mode=TwoWay}" 
-                                 ToolTip="PublicFromJsonMethods"
+                                 ToolTip="ComplexTypes"
                                  Margin="0,0,0,12" />
-                <CheckBox IsChecked="{Binding Command.EnforceFlagEnums, Mode=OneWay}" 
-                          ToolTip="EnforceFlagEnums" Margin="0,0,0,12">
-                    <TextBlock Text="Always generate enums as bit flags (with [Flags] attribute)" TextWrapping="Wrap" />
-                </CheckBox>
-
-                <CheckBox IsChecked="{Binding Command.InlineNamedArrays, Mode=OneWay}" 
-                          ToolTip="InlineNamedArrays" Margin="0,0,0,12">
-                    <TextBlock Text="Inline named arrays" TextWrapping="Wrap" />
-                </CheckBox>
-
-                <CheckBox IsChecked="{Binding Command.InlineNamedDictionaries, Mode=OneWay}" 
-                          ToolTip="InlineNamedDictionaries" Margin="0,0,0,12">
-                    <TextBlock Text="Inline named dictionaries" TextWrapping="Wrap" />
-                </CheckBox>
-
-                <CheckBox IsChecked="{Binding Command.InlineNamedTuples, Mode=OneWay}" 
-                          ToolTip="InlineNamedTuples" Margin="0,0,0,12">
-                    <TextBlock Text="Inline named tuples" TextWrapping="Wrap" />
-                </CheckBox>
-
-                <CheckBox IsChecked="{Binding Command.InlineNamedAny, Mode=OneWay}" 
-                          ToolTip="InlineNamedAny" Margin="0,0,0,12">
-                    <TextBlock Text="Inline named any schemas" TextWrapping="Wrap" />
-                </CheckBox>
-
                 <TextBlock Text="Class Style" FontWeight="Bold" Margin="0,0,0,6" />
                 <ComboBox SelectedItem="{Binding Command.ClassStyle, Mode=OneWay}" 
                           ToolTip="ClassStyle"
                           ItemsSource="{Binding ClassStyles}" Margin="0,0,0,12" />
-
-                <GroupBox Header="Serialization" Margin="0,0,0,12">
-                    <StackPanel Margin="4,8,4,-8">
-                        <CheckBox IsChecked="{Binding Command.RequiredPropertiesMustBeDefined, Mode=TwoWay}" ToolTip="RequiredPropertiesMustBeDefined" Margin="0,0,0,12">
-                            <TextBlock Text="Required properties must be defined in JSON (sets Required.Always when the property is required)" TextWrapping="Wrap" />
-                        </CheckBox>
-
-                        <CheckBox IsChecked="{Binding Command.HandleReferences, Mode=oneWay}" 
-                                  Content="Use preserve references handling (All) in the JSON serializer"
-                                  ToolTip="HandleReferences" Margin="0,0,0,12" />
-
-                        <TextBlock Text="Custom Json.NET converter types (optional, multiple on separate lines)" FontWeight="Bold" Margin="0,0,0,6" />
-                        <TextBox Text="{Binding Command.JsonConverters, Mode=TwoWay, Converter={StaticResource StringArrayConverter}}" 
-                                 ToolTip="JsonConverters" Height="52" AcceptsReturn="True" 
-                                 VerticalScrollBarVisibility="Visible" Margin="0,0,0,12" />
-
-                        <TextBlock Text="JsonSerializerSettings transformation method name (we recommend GenerateUpdateJsonSerializerSettingsMethod instead)" FontWeight="Bold"
-                                   Margin="0,0,0,6" />
-                        <TextBox Text="{Binding Command.JsonSerializerSettingsTransformationMethod, Mode=OneWay}" 
-                                 ToolTip="JsonSerializerSettingsTransformationMethod"
-                                 Margin="0,0,0,12" />
-                    </StackPanel>
-                </GroupBox>
 
                 <GroupBox Header="Primitive Types" Margin="0,0,0,12">
                     <StackPanel Margin="4,8,4,-8">

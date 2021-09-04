@@ -1,11 +1,9 @@
 {% if operation.HasSummary -%}
 /* <summary>{{ operation.Summary }}</summary> */
-{% endif -%}
-{% for parameter in operation.Parameters -%}
+{% else -%}
+/* {{ operation.HttpMethod }} {{ operation.Path }} */ {% endif -%}{% for parameter in operation.Parameters -%}
 {%     if parameter.HasDescription -%}
 --- <param name="{{ parameter.VariableName }}">{{ parameter.Description | csharpdocs }}</param>
 {%     endif -%}
-{% endfor -%}
-{% if operation.HasResultDescription -%}
-/* <returns>{{ operation.ResultDescription }}</returns> */
+{% endfor -%}{% if operation.HasResultDescription -%}/* <returns>{{ operation.ResultDescription }}</returns> */
 {% endif -%}

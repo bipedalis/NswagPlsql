@@ -47,6 +47,15 @@ namespace NSwag.CodeGeneration.PlSql.Models
 
             var parameters = GetActualParameters();
 
+            if(parameters.Count == 1 && parameters[0].AllowAdditionalProperties 
+                && parameters[0].Kind==OpenApiParameterKind.Query)
+            {
+                if (parameters[0].ActualTypeSchema.AdditionalPropertiesSchema != null)
+                {
+                    System.Diagnostics.Debug.WriteLine(operation.OperationId);
+                }
+            }
+
             if (settings.GenerateOptionalParameters)
             {
                     parameters = parameters
@@ -115,6 +124,13 @@ namespace NSwag.CodeGeneration.PlSql.Models
         /// <summary>Gets a value indicating whether the operation has a result type.</summary>
         public bool HasResult => UnwrappedResultType != "void";
 
+        public bool BlobResult
+        {
+            get
+            {
+                return UnwrappedResultType == "void" && (_operation.OperationId.ToLower().Contains("file") ||  GetSuccessResponse().Value != null && GetSuccessResponse().Value.IsBinary(_operation));
+            }
+        }
         /// <summary>
         /// The default value of the result type, i.e. default(T) or default(T)! depending on whether NRT are enabled.
         /// </summary>
@@ -158,14 +174,15 @@ namespace NSwag.CodeGeneration.PlSql.Models
         {
             get
             {
-                return ResultType == "PagedResult_1OfCBCD44323C306" 
+                return this._settings.ComplexTypes.Contains(ResultType);
+                /*ResultType == "PagedResult_1OfCBCD44323C306" 
                     || ResultType== "PagedResult_1OfCBCD4540151E"
                     || ResultType == "PagedResult_1OfCBCD416DD7BC9"
                     || ResultType == "PagedResult_1OfCBCD48925D887"
                     || ResultType == "PagedResult_1OfCBCD490E014CF"
                     || ResultType == "PagedResult_1OfCBCD4EBC5F44E"
                  //   || ResultType == "PagedResult_1OfCBCD46A763897" // proc neatrod
-                    ;
+                    ;*/
             }
         }
         /// <summary>Gets the type of the unwrapped result type (without Task).</summary>
@@ -182,6 +199,15 @@ namespace NSwag.CodeGeneration.PlSql.Models
                 return null;
             }
         }
+
+        public string FromJsonItemsProcName
+        {
+            get
+            {
+                return "FJ_" + this.Parameters.Count + "_" + this.ResultType.Substring(System.Math.Max(this.ResultType.Length-24,0));
+            }
+        }
+
         /// <summary>Gets or sets the type of the exception.</summary>
         public override string ExceptionType
         {

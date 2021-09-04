@@ -232,6 +232,22 @@ procedure from_json(pi_data json_value, po_data in out nclob ) as
      dbms_lob.createtemporary(po_data, TRUE);
      pi_data.to_clob(po_data, TRUE);
   end;
+function get_free_form_query(pi_json varchar2) return varchar2 as 
+  vj json;
+  vk json_list;
+  k varchar2(100);
+  v_query varchar2(30000);
+  vv varchar2(1000);
+begin
+  vj := json(pi_json);
+  vk := vj.get_keys;
+  for i in 1..vk.count loop
+    k := vk.get(i).get_string();
+    vv :=trim(both '"' from vj.get(i).to_char());
+    v_query := v_query || UTL_URL.ESCAPE(k) || '=' || UTL_URL.ESCAPE(vv) || chr(38);
+  end loop;
+  return v_query;
+end get_free_form_query;
 {{ Clients | tab }}
 end {{ Namespace }};
 /

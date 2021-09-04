@@ -199,7 +199,7 @@ namespace NJsonSchema.CodeGeneration.PlSql
 
 #pragma warning restore 618
 
-            return "VARCHAR2(" + (schema.MaxLength??1024).ToString() + ")" +  nullableReferenceType;
+            return "VARCHAR2(" + (schema.MaxLength ?? (typeNameHint != null && (this.Settings.LongStrings != null && this.Settings.LongStrings.Contains(typeNameHint))?32767: 1024)).ToString() + ")" +  nullableReferenceType;
         }
 
         private static string ResolveBoolean(bool isNullable)

@@ -52,5 +52,21 @@ namespace NSwag.CodeGeneration.PlSql.Models
         public bool IsBool => Type.ToUpper() == "BOOLEAN";
         public string SqlType => (Type.ToUpper() == "BOOLEAN")? "PLS_INTEGER" : Type;
 
+        public bool IsFreeFormQuery
+        {
+            get
+            {
+                if (this.Kind == OpenApiParameterKind.Query)
+                {
+                    if (this.Schema.AdditionalPropertiesSchema != null)
+                    {
+                        return true;
+                    }
+                }
+                return false;
+
+            }
+        }
+
     }
 }
