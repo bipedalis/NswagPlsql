@@ -217,7 +217,10 @@ namespace NJsonSchema.CodeGeneration.PlSql
 
             if (schema.Format == JsonFormatStrings.Long || schema.Format == "long")
             {
-                return "PLS_INTEGER" + notNull;
+                if (this.Settings.LongStrings != null && this.Settings.LongStrings.Contains(typeNameHint))
+                    return "number" + notNull;
+                else
+                    return "PLS_INTEGER" + notNull;
             }
 
             if (schema.Minimum.HasValue || schema.Maximum.HasValue)
@@ -230,12 +233,14 @@ namespace NJsonSchema.CodeGeneration.PlSql
                         schema.Maximum < int.MinValue ||
                         schema.Maximum > int.MaxValue)
                     {
-                        return "NUMBER" + notNull;
+                        return "number" + notNull;
                     }
                 }
             }
-
-            return "PLS_INTEGER" + notNull;
+            if(this.Settings.LongStrings != null && this.Settings.LongStrings.Contains(typeNameHint))
+                return "number" + notNull;
+            else
+                return "PLS_INTEGER" + notNull;
         }
 
         private static string ResolveNumber(JsonSchema schema, bool isNullable)

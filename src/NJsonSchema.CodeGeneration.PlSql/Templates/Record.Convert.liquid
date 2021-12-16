@@ -8,6 +8,8 @@ function get_json(v_model {{ClassName}}) return json as
 {% for property in AllProperties -%}
 {% if(property.IsComplex) -%}
      v_json.put('{{property.JsonName}}', get_json(v_model.{{property.FieldName}})); -- {{property.Type}} 
+{% elseif property.Type == "RAW(16)" -%}
+    putj(v_json, '{{property.JsonName}}', ConvertToString(v_model.{{property.FieldName}}));
 {% else -%}
     putj(v_json, '{{property.JsonName}}', v_model.{{property.FieldName}});
 {% endif -%}

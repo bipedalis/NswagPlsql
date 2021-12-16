@@ -55,7 +55,7 @@ namespace NSwag.CodeGeneration
         /// <returns>The type name.</returns>
         public virtual string GetBinaryResponseTypeName()
         {
-            return "FileResponse";
+            return "clob"; // "FileResponse";
         }
 
         /// <summary>Generates the the whole file containing all needed types.</summary>

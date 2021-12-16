@@ -2,7 +2,7 @@
    -- c_baseUrl varchar2(128) := '{{ BaseUrl }}';
 {% endif -%}
 ----------- {{ Class }} ---------------
-{% for operation in Operations -%}
+{% for operation in InterfaceOperations -%}
     {% template Client.Method.Documentation %}
     {% template Client.Method.Annotations %}
     function {{ operation.ActualOperationName }}{% if operation.HasParams %}({% for parameter in operation.Parameters %}{{ parameter.VariableName }} {{ parameter.SqlType }}{% if parameter.IsLast == false %}, {% endif %}{% endfor %}) {% endif %} return {% if operation.BlobResult %}blob{% else %}nclob{% endif %} is -- {{ operation.ResultType }} is
@@ -42,7 +42,7 @@
         end if;
 
 {%     endif -%}
-        v_url := rtrim(c_baseUrl,'/') || '/{{ operation.Path }}{% if operation.HasQueryParameters %}?{% endif %}';
+        v_url := rtrim(baseUrl,'/') || '/{{ operation.Path }}{% if operation.HasQueryParameters %}?{% endif %}';
 {%     for parameter in operation.PathParameters -%}
 {%         if parameter.IsOptional -%}
         if {{ parameter.VariableName }} is not null then 

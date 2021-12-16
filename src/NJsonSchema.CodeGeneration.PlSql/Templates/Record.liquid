@@ -4,8 +4,7 @@
 
  type {{ClassName}} is record
 (
-    m_isNull boolean default true
-{% for property in AllProperties -%},
+    m_isNull boolean default true{% for property in AllProperties -%},
     {{ property.FieldName }} {{ property.Type }} {% if property.HasDefaultValue %} default {{ property.DefaultValue }} {% endif -%}
 {% endfor -%}
  

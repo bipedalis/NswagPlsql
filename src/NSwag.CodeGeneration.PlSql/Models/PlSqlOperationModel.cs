@@ -81,10 +81,12 @@ namespace NSwag.CodeGeneration.PlSql.Models
             {
                 var controllerName = _settings.GenerateControllerName(ControllerName);
                 var settings = _settings as PlSqlClientGeneratorSettings;
-                if (settings != null && settings.ProtectedMethods?.Contains(controllerName + "." + ConversionUtilities.ConvertToUpperCamelCase(OperationName, false) + "Async") == true)
+                //if (settings != null && settings.ProtectedMethods?.Contains(ControllerName + '/' + controllerName + "." + ConversionUtilities.ConvertToUpperCamelCase(OperationName, false) + "Async") == true)
+                if (settings != null && settings.ProtectedMethods?.Contains(ControllerName + "/" + ConversionUtilities.ConvertToUpperCamelCase(OperationName, false)) == true)
                 {
                     return "protected";
                 }
+                System.Diagnostics.Debug.WriteLine(ControllerName + "/" + ConversionUtilities.ConvertToUpperCamelCase(OperationName, false));
 
                 return "public";
             }

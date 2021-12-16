@@ -48,6 +48,7 @@
 {%         endfor %}
 {%     endif -%}
 ---------- Interface
+function baseUrl return varchar2 deterministic;
 {% for meth in PublicFromJsonMethods %}
     procedure from_json(pi_data json_value, po_data in out {{ meth }} ); -- hack
     procedure from_json(pi_data json_value, po_data in out {{ meth }}T );
@@ -78,7 +79,7 @@ end ConvertToString;
 
 function ConvertToString(pi raw)  return varchar2 is
   begin
-    return REGEXP_REPLACE(pi, '(.{8})(.{4})(.{4})(.{4})(.*)', '\1-\2-\3-\4-\5');
+    return lower(REGEXP_REPLACE(pi, '(.{8})(.{4})(.{4})(.{4})(.*)', '\1-\2-\3-\4-\5'));
 end ConvertToString;
 
 function ConvertToBoolString(pi number) return varchar2 is
@@ -114,13 +115,24 @@ procedure putj(pi_j in out nocopy json, pi_name varchar2, pi_val boolean) as
        pi_j.put(pi_name, pi_val);
     end if;
   end;
-
-procedure rae(pi_status_code pls_integer) as 
+procedure putj(pi_j in out nocopy json, pi_name varchar2, pi_val blob) as
   begin
-   if pi_status_code != utl_http.HTTP_ACCEPTED then
+    if pi_val is not null then
+      Raise_application_error(-20000, 'Pārveidot par base64');       
+    end if;
+  end;  
+procedure rae(pi_status_code pls_integer) as
+  begin
+   if pi_status_code not in ( utl_http.HTTP_ACCEPTED, utl_http.HTTP_OK) then
      raise_application_error(-20001,'The HTTP status code of the response was not expected (' || pi_status_code || ').');
    end if;
 end rae;
+function baseUrl return varchar2 deterministic as
+  begin
+      return nvl( lietotajs.SettingsGet('ELK_BASE_URL', 26), c_baseUrl);
+  exception when others then
+      return c_baseUrl;  
+  end;
 
 function get_json(v_list RAW_16_T) return json_list as
      v_json_list json_list := json_list();
@@ -173,7 +185,6 @@ procedure from_json(pi_data json_value, po_data in out CLOBT ) as
 	 v_json_list := json_list(pi_data);
        po_data := new CLOBT();
      if v_json_list.count>0 then
-       po_data.extend(v_json_list.count);
          po_data.extend(v_json_list.count);
          for i in 1 .. v_json_list.count loop
            v_text := v_json_list.get(i);
@@ -193,7 +204,6 @@ procedure from_json(pi_data json_value, po_data in out NCLOBT ) as
 	 v_json_list := json_list(pi_data);
        po_data := new NCLOBT();
      if v_json_list.count>0 then
-       po_data.extend(v_json_list.count);
          po_data.extend(v_json_list.count);
          for i in 1 .. v_json_list.count loop
            v_text := v_json_list.get(i);
