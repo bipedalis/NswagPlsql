@@ -97,6 +97,16 @@ procedure putj(pi_j in out nocopy json, pi_name varchar2, pi_val varchar2) as
        pi_j.put(pi_name, pi_val);
     end if;
   end;
+procedure putj(pi_j in out nocopy json, pi_name varchar2, pi_val nclob) as
+  begin
+    if pi_val is not null then
+      if length(pi_val)< 32767  then
+         pi_j.put(pi_name, pi_val);
+      else
+         pi_j.put(pi_name, json_value(pi_val));
+      end if;     
+    end if;
+  end;
 procedure putj(pi_j in out nocopy json, pi_name varchar2, pi_val number) as
   begin
     if pi_val is not null then
@@ -138,7 +148,7 @@ function get_json(v_list RAW_16_T) return json_list as
      v_json_list json_list := json_list();
    begin
      for i in v_list.first .. v_list.last loop
-       v_json_list.append( v_list(i));
+       v_json_list.append( ConvertToString( v_list(i)));
      end loop;
      return v_json_list;
    end;

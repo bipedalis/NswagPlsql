@@ -48,7 +48,7 @@ namespace NSwag.CodeGeneration.PlSql.Models
 
         /// <summary>Gets a value indicating whether the parameter name is a valid PlSql identifier.</summary>
         public bool IsValidIdentifier => Name.Equals(VariableName, StringComparison.OrdinalIgnoreCase);
-        public bool IsVarchar => Type == "VARCHAR2";
+        public bool IsVarchar => Type == "VARCHAR2" || Type == "NCLOB";
         public bool IsBool => Type.ToUpper() == "BOOLEAN";
         public string SqlType => (Type.ToUpper() == "BOOLEAN")? "PLS_INTEGER" : Type;
 

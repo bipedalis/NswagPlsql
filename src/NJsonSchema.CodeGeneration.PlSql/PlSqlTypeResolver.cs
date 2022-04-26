@@ -198,7 +198,10 @@ namespace NJsonSchema.CodeGeneration.PlSql
             }
 
 #pragma warning restore 618
-
+            if ((schema.MaxLength> 32767) || (typeNameHint != null && (this.Settings.LongStrings != null && this.Settings.LongStrings.Contains("+" + typeNameHint))))
+            {
+                return "NCLOB";
+            }
             return "VARCHAR2(" + (schema.MaxLength ?? (typeNameHint != null && (this.Settings.LongStrings != null && this.Settings.LongStrings.Contains(typeNameHint))?32767: 1024)).ToString() + ")" +  nullableReferenceType;
         }
 
