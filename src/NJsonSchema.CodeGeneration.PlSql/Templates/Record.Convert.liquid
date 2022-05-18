@@ -31,7 +31,7 @@ function get_json(v_list {{ClassName}}T) return json_list as
         return v_json_list;
     end;
 
-procedure from_json(pi_data json_value, po_data in out {{ClassName}} ) as
+procedure from_json(pi_data pljson_value, po_data in out {{ClassName}} ) as
 		j json;
 	begin
         if pi_data is not null then
@@ -70,7 +70,7 @@ procedure from_json(pi_data json_value, po_data in out {{ClassName}} ) as
 {% endfor -%}
         end if;
     end;  
-procedure from_json(pi_data json_value, po_data in out {{ClassName}}T ) as 
+procedure from_json(pi_data pljson_value, po_data in out {{ClassName}}T ) as 
      v_json_list json_list;
   begin
 	 v_json_list := json_list(pi_data);

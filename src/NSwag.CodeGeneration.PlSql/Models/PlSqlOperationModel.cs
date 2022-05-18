@@ -198,6 +198,10 @@ namespace NSwag.CodeGeneration.PlSql.Models
                 {
                     return   _generator.GetTypeName(items.ActualSchema, false, !response.Value.Schema.HasTypeNameTitle ? "Response" : null);
                 }
+                if (response.Value.Schema.ActualTypeSchema.ActualProperties.TryGetValue("items", out items))
+                {
+                    return _generator.GetTypeName(items.ActualSchema, false, !response.Value.Schema.HasTypeNameTitle ? "Response" : null);
+                }
                 return null;
             }
         }

@@ -50,8 +50,8 @@
 ---------- Interface
 function baseUrl return varchar2 deterministic;
 {% for meth in PublicFromJsonMethods %}
-    procedure from_json(pi_data json_value, po_data in out {{ meth }} ); -- hack
-    procedure from_json(pi_data json_value, po_data in out {{ meth }}T );
+    procedure from_json(pi_data pljson_value, po_data in out {{ meth }} ); -- hack
+    procedure from_json(pi_data pljson_value, po_data in out {{ meth }}T );
     function get_json(v_model {{meth}}) return json;
     function get_json(v_list {{meth}}T) return json_list;
 {% endfor %}
@@ -103,7 +103,7 @@ procedure putj(pi_j in out nocopy json, pi_name varchar2, pi_val nclob) as
       if length(pi_val)< 32767  then
          pi_j.put(pi_name, pi_val);
       else
-         pi_j.put(pi_name, json_value(pi_val));
+         pi_j.put(pi_name, pljson_value(pi_val));
       end if;     
     end if;
   end;
@@ -177,7 +177,7 @@ function get_json(v_list NCLOBT) return json_list as
      end loop;
      return v_json_list;
    end;
-procedure from_json(pi_data json_value, po_data in out VARCHAR2_1024_T ) as 
+procedure from_json(pi_data pljson_value, po_data in out VARCHAR2_1024_T ) as 
      v_json_list json_list;
   begin     
 	 v_json_list := json_list(pi_data);
@@ -188,9 +188,9 @@ procedure from_json(pi_data json_value, po_data in out VARCHAR2_1024_T ) as
          end loop;  
      end if;
    end;  
-procedure from_json(pi_data json_value, po_data in out CLOBT ) as
+procedure from_json(pi_data pljson_value, po_data in out CLOBT ) as
      v_json_list json_list;
-     v_text json_value;
+     v_text pljson_value;
   begin
 	 v_json_list := json_list(pi_data);
        po_data := new CLOBT();
@@ -207,9 +207,9 @@ procedure from_json(pi_data json_value, po_data in out CLOBT ) as
          end loop;
      end if;
    end;
-procedure from_json(pi_data json_value, po_data in out NCLOBT ) as
+procedure from_json(pi_data pljson_value, po_data in out NCLOBT ) as
      v_json_list json_list;
-     v_text json_value;
+     v_text pljson_value;
   begin
 	 v_json_list := json_list(pi_data);
        po_data := new NCLOBT();
@@ -227,7 +227,7 @@ procedure from_json(pi_data json_value, po_data in out NCLOBT ) as
      end if;
    end;
 
-procedure from_json(pi_data json_value, po_data in out RAW_16_T ) as 
+procedure from_json(pi_data pljson_value, po_data in out RAW_16_T ) as 
      v_json_list json_list;
   begin
 	 v_json_list := json_list(pi_data);
@@ -247,7 +247,7 @@ function get_json(v_val nclob) return json as
     end if;
    end;
    
-procedure from_json(pi_data json_value, po_data in out nclob ) as
+procedure from_json(pi_data pljson_value, po_data in out nclob ) as
   begin
      dbms_lob.createtemporary(po_data, TRUE);
      pi_data.to_clob(po_data, TRUE);
